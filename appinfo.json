@@ -1,0 +1,17 @@
+{
+  "uuid": "c7767843-ec00-4655-9f35-93c90347134d",
+  "shortName": "kvv.live",
+  "longName": "kvv.live",
+  "companyName": "Lukas Werling",
+  "versionCode": 1,
+  "versionLabel": "0.1.0",
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}
