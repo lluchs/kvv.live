@@ -9,7 +9,11 @@
     "watchface": false
   },
   "appKeys": {
-    "dummy": 0
+    "length": 0,
+    "index": 1,
+    "route": 2,
+    "destination": 3,
+    "time": 4
   },
   "resources": {
     "media": []

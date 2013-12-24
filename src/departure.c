@@ -2,6 +2,32 @@
 #include "departure.h"
 
 /**
+ * Deserializes a departure as received.
+ */
+struct Departure departure_deserialize(DictionaryIterator *iter) {
+	struct Departure departure;
+
+    Tuple *route_tuple = dict_find(iter, DEPARTURE_KEY_ROUTE);
+    Tuple *destination_tuple = dict_find(iter, DEPARTURE_KEY_DESTINATION);
+    Tuple *time_tuple = dict_find(iter, DEPARTURE_KEY_TIME);
+
+	if (route_tuple) {
+		strncpy(departure.route, route_tuple->value->cstring, sizeof(departure.route));
+		departure.route[sizeof(departure.route) - 1] = '\0';
+	}
+	if (destination_tuple) {
+		strncpy(departure.destination, destination_tuple->value->cstring, sizeof(departure.destination));
+		departure.destination[sizeof(departure.destination) - 1] = '\0';
+	}
+	if (time_tuple) {
+		strncpy(departure.time, time_tuple->value->cstring, sizeof(departure.time));
+		departure.time[sizeof(departure.time) - 1] = '\0';
+	}
+
+	return departure;
+}
+
+/**
  * Draws a departure line.
  */
 struct DepartureLine* departure_line_create(const struct Departure *d, GRect frame) {
