@@ -1,8 +1,6 @@
 
 #include "departure.h"
 
-#define DEPARTURE_HEIGHT 19
-
 /**
  * Draws a departure line.
  */

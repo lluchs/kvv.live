@@ -4,6 +4,8 @@
 
 #include <pebble.h>
 
+#define DEPARTURE_HEIGHT 19
+
 struct Departure {
 	char *route;
 	char *destination;
