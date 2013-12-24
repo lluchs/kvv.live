@@ -1,7 +1,7 @@
 
 #include "departure.h"
 
-#define DEPARTURE_HEIGHT 20
+#define DEPARTURE_HEIGHT 19
 
 /**
  * Draws a departure line.
@@ -14,10 +14,18 @@ struct DepartureLine* departure_line_create(const struct Departure *d, GRect fra
 	line->layer = layer_create(frame);
 
 	// A departure is rendered as "route destination time".
-	line->route = text_layer_create((GRect) { .origin = { 5, 0 }, .size = { 35, DEPARTURE_HEIGHT } });
+	// route
+	line->route = text_layer_create((GRect) { .origin = { 3, 0 }, .size = { 25, DEPARTURE_HEIGHT } });
 	text_layer_set_text(line->route, d->route);
+	text_layer_set_text_alignment(line->route, GTextAlignmentCenter);
+	text_layer_set_background_color(line->route, GColorBlack);
+	text_layer_set_text_color(line->route, GColorWhite);
+
+	// destination
 	line->destination = text_layer_create((GRect) { .origin = { 30, 0 }, .size = { 70, DEPARTURE_HEIGHT } });
 	text_layer_set_text(line->destination, d->destination);
+
+	// time
 	line->time = text_layer_create((GRect) { .origin = { 105, 0 }, .size = { 39, DEPARTURE_HEIGHT } });
 	text_layer_set_text(line->time, d->time);
 
