@@ -20,11 +20,11 @@ struct DepartureLine* departure_line_create(const struct Departure *d, GRect fra
 	text_layer_set_text_color(line->route, GColorWhite);
 
 	// destination
-	line->destination = text_layer_create((GRect) { .origin = { 30, 0 }, .size = { 70, DEPARTURE_HEIGHT } });
+	line->destination = text_layer_create((GRect) { .origin = { 30, 0 }, .size = { 75, DEPARTURE_HEIGHT } });
 	text_layer_set_text(line->destination, d->destination);
 
 	// time
-	line->time = text_layer_create((GRect) { .origin = { 105, 0 }, .size = { 39, DEPARTURE_HEIGHT } });
+	line->time = text_layer_create((GRect) { .origin = { 107, 0 }, .size = { 37, DEPARTURE_HEIGHT } });
 	text_layer_set_text(line->time, d->time);
 
 	// Add to the frame.
