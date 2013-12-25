@@ -4,16 +4,9 @@
 
 #include <pebble.h>
 
-#define DEPARTURE_HEIGHT 19
+#include "network.h"
 
-enum {
-	DEPARTURE_KEY_LENGTH = 0,
-	DEPARTURE_KEY_STOPNAME,
-	DEPARTURE_KEY_INDEX,
-	DEPARTURE_KEY_ROUTE,
-	DEPARTURE_KEY_DESTINATION,
-	DEPARTURE_KEY_TIME,
-};
+#define DEPARTURE_HEIGHT 19
 
 struct Departure {
 	char route[4];

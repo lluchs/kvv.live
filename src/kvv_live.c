@@ -1,5 +1,7 @@
 #include <pebble.h>
-#include <departure.h>
+
+#include "departure.h"
+#include "network.h"
 
 static Window *window;
 static ScrollLayer *scroll_layer;
