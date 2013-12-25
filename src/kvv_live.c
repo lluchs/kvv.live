@@ -4,21 +4,35 @@
 static Window *window;
 static ScrollLayer *scroll_layer;
 
+#define TITLE_LENGTH 30
+static char title[TITLE_LENGTH];
+static TextLayer *title_layer;
+
 #define DEPARTURE_LINES 10
 static struct DepartureLine *lines[DEPARTURE_LINES];
 static struct Departure departures[DEPARTURE_LINES];
 
+#define LINES_OFFSET_Y 23
+
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
+
 	scroll_layer = scroll_layer_create(bounds);
 	scroll_layer_set_click_config_onto_window(scroll_layer, window);
 	layer_add_child(window_layer, scroll_layer_get_layer(scroll_layer));
+
+	title_layer = text_layer_create((GRect) { .origin = { 3, 0 }, .size = { bounds.size.w - 6, 20 } });
+	text_layer_set_font(title_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	text_layer_set_text(title_layer, "Loading...");
+	scroll_layer_add_child(scroll_layer, text_layer_get_layer(title_layer));
+
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "window_load");
 }
 
 static void window_unload(Window *window) {
 	scroll_layer_destroy(scroll_layer);
+	text_layer_destroy(title_layer);
 	for (unsigned int i = 0; i < DEPARTURE_LINES && lines[i]; i++) {
 		departure_line_destroy(lines[i]);
 	}
@@ -34,14 +48,14 @@ static void create_lines(int length) {
 	for (i = 0; i < length; i++) {
 		// Lazily create departure lines.
 		if (!lines[i]) {
-			int ypos = 3 + line_height * i;
+			int ypos = LINES_OFFSET_Y + line_height * i;
 			lines[i] = departure_line_create(&departures[i], (GRect) { .origin = { 0, ypos }, .size = { bounds.size.w, 20 } });
 			APP_LOG(APP_LOG_LEVEL_DEBUG, "created line %d (%s)", i, departures[i].route);
 		}
 		scroll_layer_add_child(scroll_layer, lines[i]->layer);
 		layer_mark_dirty(lines[i]->layer);
 	}
-	scroll_layer_set_content_size(scroll_layer, (GSize) { .h = 5 + line_height * i, .w = bounds.size.w });
+	scroll_layer_set_content_size(scroll_layer, (GSize) { .h = 2 + LINES_OFFSET_Y + line_height * i, .w = bounds.size.w });
 
 	// Remove remaining lines from the scroll layer.
 	for (; i < DEPARTURE_LINES && lines[i]; i++) {
@@ -56,6 +70,12 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 	if (length_tuple) {
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Received length %d", (int)length_tuple->value->int32);
 		create_lines((int)length_tuple->value->int32);
+
+		Tuple *name_tuple = dict_find(iter, DEPARTURE_KEY_STOPNAME);
+		strncpy(title, name_tuple->value->cstring, TITLE_LENGTH);
+		title[TITLE_LENGTH - 1] = '\0';
+		text_layer_set_text(title_layer, title);
+
 		// We're done, a length message does not contain anything else.
 		return;
 	}

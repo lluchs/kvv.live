@@ -10,10 +10,11 @@
   },
   "appKeys": {
     "length": 0,
-    "index": 1,
-    "route": 2,
-    "destination": 3,
-    "time": 4
+    "stopName": 1,
+    "index": 2,
+    "route": 3,
+    "destination": 4,
+    "time": 5
   },
   "resources": {
     "media": []

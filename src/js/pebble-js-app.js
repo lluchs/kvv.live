@@ -5,15 +5,15 @@ var API_KEY = '377d840e54b59adbe53608ba1aad70e8';
 // Called when the JS app is ready.
 Pebble.addEventListener('ready', function(e) {
   console.log('ready');
-  getDepartures('de:8216:35109', function(result) {
-      transferDepartures(result.departures);
+  getDepartures('de:8212:89', function(result) {
+      transferDepartures(result.stopName, result.departures);
   });
 });
 
 /* Transfers departures to Pebble. */
-function transferDepartures(departures) {
+function transferDepartures(stopName, departures) {
   // First, send the number of departures.
-  sendMessage({length: departures.length}, messageHandler('length success'));
+  sendMessage({stopName: stopName, length: departures.length}, messageHandler('length success'));
   // Departures are transfered one at a time.
   sendMessages(departures.map(transformDeparture), function() {
     console.log('Sent ' + departures.length + ' departures.');
