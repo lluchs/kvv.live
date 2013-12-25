@@ -8,7 +8,7 @@ Pebble.addEventListener('ready', function(e) {
   console.log('ready');
   transferDepartures(DEPARTURES);
   setTimeout(function() {
-    transferDepartures(DEPARTURES);
+    transferDepartures(DEPARTURES.slice(0, 2));
   }, 1000);
 });
 

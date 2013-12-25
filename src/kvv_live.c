@@ -29,8 +29,6 @@ static void create_lines(int length) {
 		length = DEPARTURE_LINES;
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
-	// Remove all lines.
-	/* layer_remove_child_layers(scroll_layer_get_layer(scroll_layer)); */
 	const int line_height = DEPARTURE_HEIGHT + 1;
 	int i;
 	for (i = 0; i < length; i++) {
@@ -44,6 +42,11 @@ static void create_lines(int length) {
 		layer_mark_dirty(lines[i]->layer);
 	}
 	scroll_layer_set_content_size(scroll_layer, (GSize) { .h = 5 + line_height * i, .w = bounds.size.w });
+
+	// Remove remaining lines from the scroll layer.
+	for (; i < DEPARTURE_LINES && lines[i]; i++) {
+	    layer_remove_from_parent(lines[i]->layer);
+	}
 }
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
