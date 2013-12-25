@@ -16,15 +16,31 @@ static struct Departure departures[DEPARTURE_LINES];
 
 #define LINES_OFFSET_Y 23
 
-/* Request departures of a stop. */
+/**
+ * Request departures of a stop.
+ *
+ * Redoes the previous request if stopId is 0.
+ */
 static void request_departures(const char *stopId) {
+	static char previousId[20] = "";
+	const char *requestId = stopId ? stopId : previousId;
+	strncpy(previousId, requestId, 20);
+
 	text_layer_set_text(title_layer, "Loading...");
 
 	DictionaryIterator *iter;
 	app_message_outbox_begin(&iter);
-	Tuplet value = TupletCString(DEPARTURES_REQUEST_KEY_STOPID, stopId);
+	Tuplet value = TupletCString(DEPARTURES_REQUEST_KEY_STOPID, requestId);
 	dict_write_tuplet(iter, &value);
 	app_message_outbox_send();
+}
+
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+	request_departures(NULL);
+}
+
+static void click_config_provider(void *context) {
+	window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
 
 static void window_load(Window *window) {
@@ -33,6 +49,7 @@ static void window_load(Window *window) {
 
 	scroll_layer = scroll_layer_create(bounds);
 	scroll_layer_set_click_config_onto_window(scroll_layer, window);
+	scroll_layer_set_callbacks(scroll_layer, (ScrollLayerCallbacks) { .click_config_provider = click_config_provider });
 	layer_add_child(window_layer, scroll_layer_get_layer(scroll_layer));
 
 	title_layer = text_layer_create((GRect) { .origin = { 3, 0 }, .size = { bounds.size.w - 6, 20 } });
