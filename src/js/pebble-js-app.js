@@ -14,8 +14,8 @@ function transferDepartures(departures) {
   // First, send the number of departures.
   sendMessage({length: departures.length}, messageHandler('length success'));
   // Departures are transfered one at a time.
-  departures.map(transformDeparture).forEach(function(departure) {
-    sendMessage(departure, messageHandler('departure success'));
+  sendMessages(departures.map(transformDeparture), function() {
+    console.log('Sent ' + departures.length + ' departures.');
   });
 }
 
@@ -43,6 +43,17 @@ function sendMessage(msg, success) {
   });
 }
 
+/* Sends an array of messages serially. */
+function sendMessages(msgs, success) {
+  if (msgs.length == 0) {
+    success();
+  } else {
+    sendMessage(first(msgs), function() {
+      sendMessages(rest(msgs), success);
+    });
+  }
+}
+
 function messageHandler(msg) {
   return function(e) {
     console.log(msg, e.data.transactionId);
@@ -50,4 +61,12 @@ function messageHandler(msg) {
       console.log(e.error.message);
     }
   }
+}
+
+function first(array) {
+  return array[0];
+}
+
+function rest(array) {
+  return array.slice(1);
 }
