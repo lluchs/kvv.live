@@ -16,6 +16,17 @@ static struct Departure departures[DEPARTURE_LINES];
 
 #define LINES_OFFSET_Y 23
 
+/* Request departures of a stop. */
+static void request_departures(const char *stopId) {
+	text_layer_set_text(title_layer, "Loading...");
+
+	DictionaryIterator *iter;
+	app_message_outbox_begin(&iter);
+	Tuplet value = TupletCString(DEPARTURES_REQUEST_KEY_STOPID, stopId);
+	dict_write_tuplet(iter, &value);
+	app_message_outbox_send();
+}
+
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
@@ -26,8 +37,9 @@ static void window_load(Window *window) {
 
 	title_layer = text_layer_create((GRect) { .origin = { 3, 0 }, .size = { bounds.size.w - 6, 20 } });
 	text_layer_set_font(title_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-	text_layer_set_text(title_layer, "Loading...");
 	scroll_layer_add_child(scroll_layer, text_layer_get_layer(title_layer));
+
+	request_departures("de:8212:89");
 
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "window_load");
 }
@@ -68,12 +80,12 @@ static void create_lines(int length) {
 static void in_received_handler(DictionaryIterator *iter, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "Received message");
 
-    Tuple *length_tuple = dict_find(iter, DEPARTURE_KEY_LENGTH);
+    Tuple *length_tuple = dict_find(iter, DEPARTURES_KEY_LENGTH);
 	if (length_tuple) {
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Received length %d", (int)length_tuple->value->int32);
 		create_lines((int)length_tuple->value->int32);
 
-		Tuple *name_tuple = dict_find(iter, DEPARTURE_KEY_STOPNAME);
+		Tuple *name_tuple = dict_find(iter, DEPARTURES_KEY_STOPNAME);
 		strncpy(title, name_tuple->value->cstring, TITLE_LENGTH);
 		title[TITLE_LENGTH - 1] = '\0';
 		text_layer_set_text(title_layer, title);

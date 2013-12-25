@@ -5,9 +5,16 @@ var API_KEY = '377d840e54b59adbe53608ba1aad70e8';
 // Called when the JS app is ready.
 Pebble.addEventListener('ready', function(e) {
   console.log('ready');
-  getDepartures('de:8212:89', function(result) {
-      transferDepartures(result.stopName, result.departures);
-  });
+});
+
+// Called when receiving a message from Pebble.
+Pebble.addEventListener('appmessage', function(e) {
+  if ('stopId' in e.payload) {
+    console.log('Received stopId', e.payload.stopId);
+    getDepartures(e.payload.stopId, function(result) {
+        transferDepartures(result.stopName, result.departures);
+    });
+  }
 });
 
 /* Transfers departures to Pebble. */
