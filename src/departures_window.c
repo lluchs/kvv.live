@@ -1,6 +1,7 @@
 /* Window showing departures. */
 
 #include <pebble.h>
+#include "departures_window.h"
 #include "departure.h"
 
 static Window *window;
@@ -55,8 +56,6 @@ static void window_load(Window *window) {
 	text_layer_set_font(title_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 	scroll_layer_add_child(scroll_layer, text_layer_get_layer(title_layer));
 
-	request_departures();
-
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "window_load");
 }
 
@@ -65,7 +64,9 @@ static void window_unload(Window *window) {
 	text_layer_destroy(title_layer);
 	for (unsigned int i = 0; i < DEPARTURE_LINES && lines[i]; i++) {
 		departure_line_destroy(lines[i]);
+		lines[i] = NULL;
 	}
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "window_unload");
 }
 
 static void create_lines(int length) {
@@ -89,8 +90,17 @@ static void create_lines(int length) {
 
 	// Remove remaining lines from the scroll layer.
 	for (; i < DEPARTURE_LINES && lines[i]; i++) {
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Removing line %d: %p %p", i, lines[i], lines[i]->layer);
 	    layer_remove_from_parent(lines[i]->layer);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Removal successful");
 	}
+}
+
+static void window_appear(Window *window) {
+	// Hide all existing lines.
+	create_lines(0);
+	request_departures();
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "window_appear");
 }
 
 void departures_window_receive_announcement(DictionaryIterator *iter) {
@@ -115,14 +125,18 @@ void departures_window_receive_departure(DictionaryIterator *iter) {
 	layer_mark_dirty(lines[index]->layer);
 }
 
-void departures_window_init(char *nextStopId) {
-	strncpy(stopId, nextStopId, 20);
-
+void departures_window_init() {
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) {
 		.load = window_load,
+		.appear = window_appear,
 		.unload = window_unload,
 	});
+}
+
+void departures_window_show(char *nextStopId) {
+	strncpy(stopId, nextStopId, 20);
+
 	const bool animated = true;
 	window_stack_push(window, animated);
 }

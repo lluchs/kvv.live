@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "network.h"
 #include "departures_window.h"
+#include "stops_window.h"
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "Received message");
@@ -23,10 +24,12 @@ static void app_message_init() {
 
 static void init(void) {
 	app_message_init();
-	departures_window_init("de:8212:89");
+	stops_window_init();
+	departures_window_init();
 }
 
 static void deinit(void) {
+	stops_window_deinit();
 	departures_window_deinit();
 }
 
