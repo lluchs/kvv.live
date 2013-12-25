@@ -28,7 +28,7 @@ function transformDeparture(departure, i) {
     time: (function(time) {
       if (time === '0')
         time = 'now';
-      if (departure.realtime)
+      if (!departure.realtime)
         time += '*';
       return time;
     })(departure.time),
