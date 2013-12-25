@@ -9,9 +9,9 @@
 enum {
 	DEPARTURE_KEY_LENGTH = 0,
 	DEPARTURE_KEY_INDEX,
-    DEPARTURE_KEY_ROUTE,
-    DEPARTURE_KEY_DESTINATION,
-    DEPARTURE_KEY_TIME,
+	DEPARTURE_KEY_ROUTE,
+	DEPARTURE_KEY_DESTINATION,
+	DEPARTURE_KEY_TIME,
 };
 
 struct Departure {
@@ -27,7 +27,7 @@ struct DepartureLine {
 	TextLayer *time;
 };
 
-struct Departure departure_deserialize(DictionaryIterator *iter);
+void departure_deserialize(DictionaryIterator *iter, struct Departure *departure);
 
 struct DepartureLine* departure_line_create(const struct Departure *d, GRect frame);
 

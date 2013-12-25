@@ -7,9 +7,6 @@ var DEPARTURES = [{"route":"S41","destination":"Freudenstadt Hbf","direction":"1
 Pebble.addEventListener('ready', function(e) {
   console.log('ready');
   transferDepartures(DEPARTURES);
-  setTimeout(function() {
-    transferDepartures(DEPARTURES.slice(0, 2));
-  }, 1000);
 });
 
 /* Transfers departures to Pebble. */

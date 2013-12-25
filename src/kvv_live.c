@@ -51,10 +51,22 @@ static void create_lines(int length) {
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "Received message");
+
     Tuple *length_tuple = dict_find(iter, DEPARTURE_KEY_LENGTH);
 	if (length_tuple) {
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Received length %d", (int)length_tuple->value->int32);
 		create_lines((int)length_tuple->value->int32);
+		// We're done, a length message does not contain anything else.
+		return;
+	}
+
+    Tuple *index_tuple = dict_find(iter, DEPARTURE_KEY_INDEX);
+	if (index_tuple) {
+		// This is a destination object.
+		int index = index_tuple->value->int32;
+		departure_deserialize(iter, &departures[index]);
+		// Initiate a redraw of the given departure.
+		layer_mark_dirty(lines[index]->layer);
 	}
 }
 
@@ -64,39 +76,6 @@ static void app_message_init() {
 }
 
 static void init(void) {
-	// Initialize test departures.
-	strcpy(departures[0].route, "S4");
-	strcpy(departures[0].destination, "Tullastrasse");
-	strcpy(departures[0].time, "now");
-	strcpy(departures[1].route, "S41");
-	strcpy(departures[1].destination, "Freudenstadt Hbf");
-	strcpy(departures[1].time, "12:25");
-	strcpy(departures[2].route, "S41");
-	strcpy(departures[2].destination, "Tullastrasse");
-	strcpy(departures[2].time, "12:35");
-	strcpy(departures[3].route, "S4");
-	strcpy(departures[3].destination, "Achern");
-	strcpy(departures[3].time, "12:45");
-	strcpy(departures[4].route, "S4");
-	strcpy(departures[4].destination, "Tullastrasse");
-	strcpy(departures[4].time, "13:15");
-
-	strcpy(departures[5].route, "S4");
-	strcpy(departures[5].destination, "Tullastrasse");
-	strcpy(departures[5].time, "3min");
-	strcpy(departures[6].route, "S41");
-	strcpy(departures[6].destination, "Freudenstadt Hbf");
-	strcpy(departures[6].time, "12:25");
-	strcpy(departures[7].route, "S41");
-	strcpy(departures[7].destination, "Tullastrasse");
-	strcpy(departures[7].time, "12:35");
-	strcpy(departures[8].route, "S4");
-	strcpy(departures[8].destination, "Achern");
-	strcpy(departures[8].time, "12:45");
-	strcpy(departures[9].route, "S4");
-	strcpy(departures[9].destination, "Tullastrasse");
-	strcpy(departures[9].time, "13:15");
-
 	window = window_create();
 	app_message_init();
 	window_set_window_handlers(window, (WindowHandlers) {
