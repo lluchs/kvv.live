@@ -1,12 +1,13 @@
 /* The JS app transfers departures from the kvv.live API to Pebble. */
 
-// Example data from the API.
-var DEPARTURES = [{"route":"S41","destination":"Freudenstadt Hbf","direction":"1","time":"14:24","lowfloor":false,"realtime":true,"traction":2},{"route":"S41","destination":"Tullastraße","direction":"2","time":"14:34","lowfloor":false,"realtime":true,"traction":2},{"route":"S4","destination":"Achern","direction":"1","time":"14:44","lowfloor":false,"realtime":false,"traction":0},{"route":"S4","destination":"Tullastraße","direction":"2","time":"15:13","lowfloor":false,"realtime":false,"traction":0}];
+var API_KEY = '377d840e54b59adbe53608ba1aad70e8';
 
 // Called when the JS app is ready.
 Pebble.addEventListener('ready', function(e) {
   console.log('ready');
-  transferDepartures(DEPARTURES);
+  getDepartures('de:8216:35109', function(result) {
+      transferDepartures(result.departures);
+  });
 });
 
 /* Transfers departures to Pebble. */
@@ -61,6 +62,26 @@ function messageHandler(msg) {
       console.log(e.error.message);
     }
   }
+}
+
+/* Requests departures from the API. */
+function getDepartures(stopId, then) {
+  var req = new XMLHttpRequest();
+  req.open('GET', apiUrl('http://live.kvv.de/webapp/departures/bystop/'+stopId+'?maxInfos=10'), true);
+  req.onload = function(e) {
+    if (req.readyState == 4 && req.status == 200) {
+      var response = JSON.parse(req.responseText);
+      then(response);
+    } else {
+      console.error('Could not get departures', req.status);
+    }
+  };
+  req.send();
+}
+
+/* Adds the API key to an URL. */
+function apiUrl(url) {
+  return url + '&key=' + API_KEY;
 }
 
 function first(array) {
