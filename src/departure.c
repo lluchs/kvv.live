@@ -45,6 +45,7 @@ struct DepartureLine* departure_line_create(const struct Departure *d, GRect fra
 
 	// destination
 	line->destination = text_layer_create((GRect) { .origin = { 30, 0 }, .size = { 75, DEPARTURE_HEIGHT } });
+	text_layer_set_font(line->destination, fonts_get_system_font(FONT_KEY_GOTHIC_14));
 	text_layer_set_text(line->destination, d->destination);
 
 	// time
