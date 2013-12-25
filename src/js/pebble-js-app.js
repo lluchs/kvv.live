@@ -12,10 +12,10 @@ Pebble.addEventListener('ready', function(e) {
 /* Transfers departures to Pebble. */
 function transferDepartures(departures) {
   // First, send the number of departures.
-  Pebble.sendAppMessage({length: departures.length}, messageHandler('length success'), messageHandler('length failure'));
+  sendMessage({length: departures.length}, messageHandler('length success'));
   // Departures are transfered one at a time.
   departures.map(transformDeparture).forEach(function(departure) {
-    Pebble.sendAppMessage(departure, messageHandler('departure success'), messageHandler('departure failure'));
+    sendMessage(departure, messageHandler('departure success'));
   });
 }
 
@@ -33,6 +33,14 @@ function transformDeparture(departure, i) {
       return time;
     })(departure.time),
   };
+}
+
+/* Sends a message, retrying until it's successful. */
+function sendMessage(msg, success) {
+  Pebble.sendAppMessage(msg, success, function(e) {
+    console.log('Retrying msg', e.data.transactionId);
+    sendMessage(msg, success);
+  });
 }
 
 function messageHandler(msg) {
