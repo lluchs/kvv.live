@@ -125,6 +125,10 @@ void departures_window_receive_departure(DictionaryIterator *iter) {
 	layer_mark_dirty(lines[index]->layer);
 }
 
+void departures_window_handle_error() {
+	text_layer_set_text(title_layer, "ERROR: No conn.");
+}
+
 void departures_window_init() {
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) {

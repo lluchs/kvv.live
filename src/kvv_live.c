@@ -17,8 +17,15 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 	}
 }
 
+static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "Could not send message");
+	// Right now, only the departures window sends any messages.
+	departures_window_handle_error();
+}
+
 static void app_message_init() {
 	app_message_register_inbox_received(in_received_handler);
+	app_message_register_outbox_failed(out_failed_handler);
 	app_message_open(app_message_outbox_size_maximum(), APP_MESSAGE_INBOX_SIZE_MINIMUM);
 }
 
