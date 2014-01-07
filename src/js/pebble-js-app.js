@@ -20,7 +20,7 @@ Pebble.addEventListener('appmessage', function(e) {
 /* Transfers departures to Pebble. */
 function transferDepartures(stopName, departures) {
   // First, send the number of departures.
-  sendMessage({stopName: stopName, length: departures.length}, messageHandler('length success'));
+  sendMessage({stopName: transformStopName(stopName), length: departures.length}, messageHandler('length success'));
   // Departures are transfered one at a time.
   sendMessages(departures.map(transformDeparture), function() {
     console.log('Sent ' + departures.length + ' departures.');
@@ -32,7 +32,7 @@ function transformDeparture(departure, i) {
   return {
     index: i,
     route: departure.route,
-    destination: departure.destination,
+    destination: transformStopName(departure.destination),
     time: (function(time) {
       if (time === '0')
         time = 'now';
@@ -41,6 +41,11 @@ function transformDeparture(departure, i) {
       return time;
     })(departure.time),
   };
+}
+
+/* Transforms a stop name. */
+function transformStopName(name) {
+  return name.replace('Karlsruhe', 'KA');
 }
 
 /* Sends a message, retrying until it's successful. */
