@@ -136,6 +136,9 @@ void departures_window_init() {
 
 void departures_window_show(char *nextStopId) {
 	strncpy(stopId, nextStopId, 20);
+	
+	// Reset previous departures.
+	memset(departures, 0, DEPARTURE_LINES * sizeof(struct Departure));
 
 	const bool animated = true;
 	window_stack_push(window, animated);
