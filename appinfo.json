@@ -21,6 +21,13 @@
         "watchface": false
     },
     "resources": {
-        "media": []
+        "media": [
+            {
+                "menuIcon": true,
+                "type": "png",
+                "name": "KVV_LOGO",
+                "file": "images/kvv_logo.png"
+            }
+        ]
     }
 }
