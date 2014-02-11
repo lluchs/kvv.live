@@ -51,7 +51,7 @@ function transferFavorites(favorites) {
 function transformStop(stop, i) {
   return {
     index: i,
-    stopName: stop.name,
+    stopName: transformStopName(stop.name),
     stopId: stop.id
   };
 }
