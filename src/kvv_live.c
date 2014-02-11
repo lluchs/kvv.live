@@ -2,19 +2,31 @@
 #include "network.h"
 #include "departures_window.h"
 #include "stops_window.h"
+#include "stops.h"
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "Received message");
 
-	if (dict_find(iter, DEPARTURES_KEY_LENGTH)) {
-		departures_window_receive_announcement(iter);
+	// Length announcements.
+	if (dict_find(iter, MSG_KEY_LENGTH)) {
+		if (dict_find(iter, MSG_KEY_STOPNAME)) {
+			departures_window_receive_announcement(iter);
+		} else {
+			stops_set_num(dict_find(iter, MSG_KEY_LENGTH)->value->int32);
+		}
 		return;
 	}
 
-	if (dict_find(iter, DEPARTURE_KEY_INDEX)) {
-		departures_window_receive_departure(iter);
+	// Content.
+	if (dict_find(iter, MSG_KEY_INDEX)) {
+		if (dict_find(iter, DEPARTURE_KEY_ROUTE)) {
+			departures_window_receive_departure(iter);
+		} else {
+			stops_receive_stop(iter);
+		}
 		return;
 	}
+
 }
 
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {

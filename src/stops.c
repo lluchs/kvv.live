@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "stops.h"
+#include "network.h"
 
 /* Adds the given stop to the persistant memory. */
 static void add_stop(int i, char *name, char *id) {
@@ -9,7 +10,7 @@ static void add_stop(int i, char *name, char *id) {
 }
 
 static void create_default_stops() {
-	persist_write_int(PERSIST_STOPS_LENGTH, 5);
+	stops_set_num(5);
 	add_stop(0, "Durmersheim Nord", "de:8216:35109");
 	add_stop(1, "Durlacher Tor", "de:8212:3");
 	add_stop(2, "Albtalbahnhof", "de:8212:1201");
@@ -60,4 +61,29 @@ void stops_destroy(struct stops *stops) {
 	free(stops->names);
 	free(stops->ids);
 	free(stops);
+}
+
+/* Saves the given number of stops in persistant memory. */
+void stops_set_num(int num) {
+	if (persist_exists(PERSIST_STOPS_LENGTH)) {
+		int prevnum = persist_read_int(PERSIST_STOPS_LENGTH);
+		// Remove obsolete entries.
+		for (int i = prevnum; i > num; i--) {
+			persist_delete(PERSIST_STOPS_START + i * 2);
+			persist_delete(PERSIST_STOPS_START + i * 2 + 1);
+		}
+	}
+	persist_write_int(PERSIST_STOPS_LENGTH, num);
+}
+
+/* Handles a stop message. */
+void stops_receive_stop(DictionaryIterator *iter) {
+	int index = dict_find(iter, MSG_KEY_INDEX)->value->int32;
+	sds name = sdsnew(dict_find(iter, MSG_KEY_STOPNAME)->value->cstring);
+	sds id = sdsnew(dict_find(iter, MSG_KEY_STOPID)->value->cstring);
+
+	add_stop(index, name, id);
+
+	sdsfree(name);
+	sdsfree(id);
 }

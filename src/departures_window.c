@@ -30,7 +30,7 @@ static void request_departures() {
 	// Indirection to avoid "is always true" warning due to the
 	// TupletCString macro.
 	char *id = stopId;
-	Tuplet value = TupletCString(DEPARTURES_REQUEST_KEY_STOPID, id);
+	Tuplet value = TupletCString(MSG_KEY_STOPID, id);
 	dict_write_tuplet(iter, &value);
 	app_message_outbox_send();
 }
@@ -104,11 +104,11 @@ static void window_appear(Window *window) {
 }
 
 void departures_window_receive_announcement(DictionaryIterator *iter) {
-    Tuple *length_tuple = dict_find(iter, DEPARTURES_KEY_LENGTH);
+    Tuple *length_tuple = dict_find(iter, MSG_KEY_LENGTH);
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "Received length %d", (int)length_tuple->value->int32);
 	create_lines((int)length_tuple->value->int32);
 
-	Tuple *name_tuple = dict_find(iter, DEPARTURES_KEY_STOPNAME);
+	Tuple *name_tuple = dict_find(iter, MSG_KEY_STOPNAME);
 	strncpy(title, name_tuple->value->cstring, TITLE_LENGTH);
 	title[TITLE_LENGTH - 1] = '\0';
 	text_layer_set_text(title_layer, title);
@@ -117,7 +117,7 @@ void departures_window_receive_announcement(DictionaryIterator *iter) {
 }
 
 void departures_window_receive_departure(DictionaryIterator *iter) {
-    Tuple *index_tuple = dict_find(iter, DEPARTURE_KEY_INDEX);
+    Tuple *index_tuple = dict_find(iter, MSG_KEY_INDEX);
 	// This is a destination object.
 	int index = index_tuple->value->int32;
 	departure_deserialize(iter, &departures[index]);

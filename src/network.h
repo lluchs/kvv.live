@@ -3,15 +3,15 @@
 #pragma once
 
 enum {
-	// Departures announcement message.
-	DEPARTURES_KEY_LENGTH = 0,
-	DEPARTURES_KEY_STOPNAME,
+	// Universal message keys.
+	MSG_KEY_LENGTH = 0,
+	MSG_KEY_INDEX,
+	MSG_KEY_STOPNAME,
+	MSG_KEY_STOPID,
+
 	// Single departure.
-	DEPARTURE_KEY_INDEX,
 	DEPARTURE_KEY_ROUTE,
 	DEPARTURE_KEY_DESTINATION,
 	DEPARTURE_KEY_TIME,
-	// Departures request.
-	DEPARTURES_REQUEST_KEY_STOPID,
 };
 

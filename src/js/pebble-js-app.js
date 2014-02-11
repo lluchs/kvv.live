@@ -2,15 +2,6 @@
 
 var API_KEY = '377d840e54b59adbe53608ba1aad70e8';
 
-// Try to read the favorites.
-var favorites = (function() {
-  try {
-    return JSON.parse(localStorage['favorites']).favorites;
-  } catch (err) {
-    return [];
-  }
-})();
-
 // Called when the JS app is ready.
 Pebble.addEventListener('ready', function(e) {
   console.log('ready');
@@ -18,7 +9,7 @@ Pebble.addEventListener('ready', function(e) {
 
 // Called when the user wants to configure the app.
 Pebble.addEventListener('showConfiguration', function(e) {
-  console.log("Opening configuration: " + favorites.length + " favorites");
+  console.log("Opening configuration");
   Pebble.openURL('http://kvv-live.lwrl.de/#' + encodeURIComponent(localStorage['favorites']));
 });
 
@@ -30,6 +21,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
     favorites = JSON.parse(resp).favorites;
     localStorage['favorites'] = resp;
     console.log("Received " + favorites.length + " favorites");
+    transferFavorites(favorites);
   }
 });
 
@@ -40,8 +32,29 @@ Pebble.addEventListener('appmessage', function(e) {
     getDepartures(e.payload.stopId, function(result) {
         transferDepartures(result.stopName, result.departures);
     });
+  } else {
+    console.log('Received unknown message: ' + JSON.stringify(e.payload));
   }
 });
+
+/* Transfers favorite stops to Pebble. */
+function transferFavorites(favorites) {
+  // Send the number of favorites.
+  sendMessage({length: favorites.length}, messageHandler('favorites length success'));
+  // Send favorites.
+  sendMessages(favorites.map(transformStop), function() {
+    console.log('Sent ' + favorites.length + ' favorites.');
+  });
+}
+
+/* Transforms the stop to a pebble message. */
+function transformStop(stop, i) {
+  return {
+    index: i,
+    stopName: stop.name,
+    stopId: stop.id
+  };
+}
 
 /* Transfers departures to Pebble. */
 function transferDepartures(stopName, departures) {
