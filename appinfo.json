@@ -13,7 +13,7 @@
     "longName": "kvv.live",
     "versionCode": 1,
     "capabilities": [
-        ""
+        "configurable"
     ],
     "shortName": "kvv.live",
     "companyName": "Lukas Werling",

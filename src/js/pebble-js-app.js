@@ -2,9 +2,35 @@
 
 var API_KEY = '377d840e54b59adbe53608ba1aad70e8';
 
+// Try to read the favorites.
+var favorites = (function() {
+  try {
+    return JSON.parse(localStorage['favorites']).favorites;
+  } catch (err) {
+    return [];
+  }
+})();
+
 // Called when the JS app is ready.
 Pebble.addEventListener('ready', function(e) {
   console.log('ready');
+});
+
+// Called when the user wants to configure the app.
+Pebble.addEventListener('showConfiguration', function(e) {
+  console.log("Opening configuration: " + favorites.length + " favorites");
+  Pebble.openURL('http://kvv-live.lwrl.de/#' + encodeURIComponent(localStorage['favorites']));
+});
+
+// Called when the user is done configuring the app.
+Pebble.addEventListener('webviewclosed', function(e) {
+  var resp = decodeURIComponent(e.response);
+  // Null when pressing "Cancel".
+  if (resp) {
+    favorites = JSON.parse(resp).favorites;
+    localStorage['favorites'] = resp;
+    console.log("Received " + favorites.length + " favorites");
+  }
 });
 
 // Called when receiving a message from Pebble.
