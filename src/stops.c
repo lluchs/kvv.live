@@ -11,11 +11,11 @@ static void add_stop(int i, char *name, char *id) {
 
 static void create_default_stops() {
 	stops_set_num(5);
-	add_stop(0, "Durmersheim Nord", "de:8216:35109");
-	add_stop(1, "Durlacher Tor", "de:8212:3");
-	add_stop(2, "Albtalbahnhof", "de:8212:1201");
-	add_stop(3, "ZKM", "de:8212:65");
-	add_stop(4, "Ebertstraße", "de:8212:91");
+	add_stop(0, "KA Hbf Vorplatz", "de:8212:89");
+	add_stop(1, "KA Durlacher Tor", "de:8212:3");
+	add_stop(2, "KA Marktplatz (Kaiserstr)", "de:8212:1");
+	add_stop(3, "KA ZKM", "de:8212:65");
+	add_stop(4, "KA Entenfang", "de:8212:51");
 }
 
 /* Reads stops from persistent memory. */
