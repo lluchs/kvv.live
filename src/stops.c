@@ -20,7 +20,7 @@ static void create_default_stops() {
 
 /* Reads stops from persistent memory. */
 struct stops* read_stops() {
-	if (!persist_exists(PERSIST_STOPS_LENGTH)) {
+	if (!persist_read_int(PERSIST_STOPS_LENGTH)) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "No stops found, creating default ones...");
 		create_default_stops();
 	}
