@@ -17,7 +17,7 @@ static TextLayer *title_layer;
 static struct DepartureLine *lines[DEPARTURE_LINES];
 static struct Departure departures[DEPARTURE_LINES];
 
-#define LINES_OFFSET_Y 23
+#define LINES_OFFSET_Y 0
 
 /**
  * Request departures of the current stop.
@@ -47,14 +47,14 @@ static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
 
-	scroll_layer = scroll_layer_create(bounds);
+	scroll_layer = scroll_layer_create((GRect) { .origin = { 0, 23 }, .size = { bounds.size.w, bounds.size.h - 23 } });
 	scroll_layer_set_click_config_onto_window(scroll_layer, window);
 	scroll_layer_set_callbacks(scroll_layer, (ScrollLayerCallbacks) { .click_config_provider = click_config_provider });
 	layer_add_child(window_layer, scroll_layer_get_layer(scroll_layer));
 
-	title_layer = text_layer_create((GRect) { .origin = { 3, 0 }, .size = { bounds.size.w - 6, 21 } });
+	title_layer = text_layer_create((GRect) { .origin = { 3, -1 }, .size = { bounds.size.w - 6, 21 } });
 	text_layer_set_font(title_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-	scroll_layer_add_child(scroll_layer, text_layer_get_layer(title_layer));
+	layer_add_child(window_layer, text_layer_get_layer(title_layer));
 
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "window_load");
 }
