@@ -27,6 +27,19 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 		return;
 	}
 
+	// Actions.
+	Tuple *tuple;
+	if ((tuple = dict_find(iter, MSG_KEY_ACTION))) {
+		int action = tuple->value->int32;
+		switch (action) {
+			case MSG_ACTION_RELOAD_STOPS:
+				stops_window_reload();
+				break;
+			default:
+				APP_LOG(APP_LOG_LEVEL_ERROR, "Invalid action %d", action);
+		}
+		return;
+	}
 }
 
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {

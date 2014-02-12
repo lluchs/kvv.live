@@ -60,3 +60,9 @@ void stops_window_deinit() {
 
 	window_destroy(window);
 }
+
+void stops_window_reload() {
+	stops_window_deinit();
+	window_stack_pop_all(true);
+	stops_window_init();
+}

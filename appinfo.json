@@ -6,9 +6,10 @@
         "index": 1,
         "stopName": 2,
         "stopId": 3,
-        "route": 4,
-        "destination": 5,
-        "time": 6
+        "action": 4,
+        "route": 5,
+        "destination": 6,
+        "time": 7
     },
     "longName": "kvv.live",
     "versionCode": 1,

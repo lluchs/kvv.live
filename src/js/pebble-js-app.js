@@ -44,6 +44,7 @@ function transferFavorites(favorites) {
   // Send favorites.
   sendMessages(favorites.map(transformStop), function() {
     console.log('Sent ' + favorites.length + ' favorites.');
+    sendMessage(action('reload_stops'), messageHandler('sent reload action'));
   });
 }
 
@@ -133,6 +134,16 @@ function getDepartures(stopId, then) {
 /* Adds the API key to an URL. */
 function apiUrl(url) {
   return url + '&key=' + API_KEY;
+}
+
+/* Action encoding. */
+function action(act) {
+  var actions = {
+    reload_stops: 0,
+  };
+  return {
+    action: actions[act]
+  };
 }
 
 function first(array) {
