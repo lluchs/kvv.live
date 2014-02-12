@@ -91,7 +91,7 @@ static void create_lines(int length) {
 	// Remove remaining lines from the scroll layer.
 	for (; i < DEPARTURE_LINES && lines[i]; i++) {
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Removing line %d: %p %p", i, lines[i], lines[i]->layer);
-	    layer_remove_from_parent(lines[i]->layer);
+		layer_remove_from_parent(lines[i]->layer);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Removal successful");
 	}
 }
@@ -104,7 +104,10 @@ static void window_appear(Window *window) {
 }
 
 void departures_window_receive_announcement(DictionaryIterator *iter) {
-    Tuple *length_tuple = dict_find(iter, MSG_KEY_LENGTH);
+	// The window might be closed by now.
+	if (!window_stack_contains_window(window)) return;
+
+	Tuple *length_tuple = dict_find(iter, MSG_KEY_LENGTH);
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "Received length %d", (int)length_tuple->value->int32);
 	create_lines((int)length_tuple->value->int32);
 
@@ -117,7 +120,10 @@ void departures_window_receive_announcement(DictionaryIterator *iter) {
 }
 
 void departures_window_receive_departure(DictionaryIterator *iter) {
-    Tuple *index_tuple = dict_find(iter, MSG_KEY_INDEX);
+	// The window might be closed by now.
+	if (!window_stack_contains_window(window)) return;
+
+	Tuple *index_tuple = dict_find(iter, MSG_KEY_INDEX);
 	// This is a destination object.
 	int index = index_tuple->value->int32;
 	departure_deserialize(iter, &departures[index]);
