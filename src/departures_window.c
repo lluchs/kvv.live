@@ -126,9 +126,14 @@ void departures_window_receive_departure(DictionaryIterator *iter) {
 	Tuple *index_tuple = dict_find(iter, MSG_KEY_INDEX);
 	// This is a destination object.
 	int index = index_tuple->value->int32;
-	departure_deserialize(iter, &departures[index]);
-	// Initiate a redraw of the given departure.
-	layer_mark_dirty(lines[index]->layer);
+
+	// Make sure that the line does actually exist.
+	// It might not if the user is switching stops very fast.
+	if (lines[index]) {
+		departure_deserialize(iter, &departures[index]);
+		// Initiate a redraw of the given departure.
+		layer_mark_dirty(lines[index]->layer);
+	}
 }
 
 void departures_window_handle_error() {
