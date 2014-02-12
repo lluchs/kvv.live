@@ -2,6 +2,9 @@
 
 var API_KEY = '377d840e54b59adbe53608ba1aad70e8';
 
+// This function makes sure that there's only one transfer at a time.
+var stopPreviousTransfer = noop;
+
 // Called when the JS app is ready.
 Pebble.addEventListener('ready', function(e) {
   console.log('ready');
@@ -25,11 +28,17 @@ Pebble.addEventListener('webviewclosed', function(e) {
   }
 });
 
+var lastStopId;
 // Called when receiving a message from Pebble.
 Pebble.addEventListener('appmessage', function(e) {
   if ('stopId' in e.payload) {
     console.log('Received stopId', e.payload.stopId);
+    lastStopId = e.payload.stopId;
+    stopPreviousTransfer();
     getDepartures(e.payload.stopId, function(result) {
+      // Make sure that there wasn't a second request while we were waiting for
+      // an answer.
+      if (lastStopId == e.payload.stopId)
         transferDepartures(result.stopName, result.departures);
     });
   } else {
@@ -62,7 +71,7 @@ function transferDepartures(stopName, departures) {
   // First, send the number of departures.
   sendMessage({stopName: transformStopName(stopName), length: departures.length}, messageHandler('length success'));
   // Departures are transfered one at a time.
-  sendMessages(departures.map(transformDeparture), function() {
+  stopPreviousTransfer = sendMessages(departures.map(transformDeparture), function() {
     console.log('Sent ' + departures.length + ' departures.');
   });
 }
@@ -88,23 +97,50 @@ function transformStopName(name) {
   return name.replace('Karlsruhe', 'KA');
 }
 
-/* Sends a message, retrying until it's successful. */
+/*
+ * Sends a message, retrying until it's successful.
+ * 
+ * Returns a function which will stop the retry loop.
+*/
 function sendMessage(msg, success) {
+  var cancel = noop, cancelled = false;
+
   Pebble.sendAppMessage(msg, success, function(e) {
-    console.log('Retrying msg', e.data.transactionId);
-    sendMessage(msg, success);
+    if (cancelled) {
+      console.log('Msg cancelled', e.data.transactionId);
+    } else {
+      console.log('Retrying msg', e.data.transactionId);
+      cancel = sendMessage(msg, success);
+    }
   });
+
+  return function() {
+    cancelled = true;
+    cancel();
+  };
 }
 
-/* Sends an array of messages serially. */
+/*
+ * Sends an array of messages serially.
+ * 
+ * Returns a function which will stop the queue.
+ */
 function sendMessages(msgs, success) {
+  var cancel = noop, cancelled = false;
   if (msgs.length == 0) {
     success();
   } else {
-    sendMessage(first(msgs), function() {
-      sendMessages(rest(msgs), success);
+    cancel = sendMessage(first(msgs), function() {
+      if (cancelled)
+        console.log('Cancelled sending ' + msgs.length + ' messages.');
+      else
+        cancel = sendMessages(rest(msgs), success);
     });
   }
+  return function() {
+    cancelled = true;
+    cancel();
+  };
 }
 
 function messageHandler(msg) {
@@ -153,6 +189,8 @@ function first(array) {
 function rest(array) {
   return array.slice(1);
 }
+
+function noop() {}
 
 /* UTF-8 <-> Base64 encoding. */
 function b64_to_utf8(str) {
