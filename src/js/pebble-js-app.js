@@ -88,11 +88,15 @@ function transferFavorites(favorites) {
 /* Transforms the stop to a pebble message. */
 function transformStop(params) {
   return function(stop, i) {
+    // Include the distance when available.
+    var dist = {};
+    if (stop.distance)
+      dist.distance = stop.distance;
     return extend({
       index: i,
       stopName: transformStopName(stop.name),
       stopId: stop.id
-    }, params);
+    }, dist, params);
   }
 }
 

@@ -10,7 +10,8 @@
         "type": 5,
         "route": 6,
         "destination": 7,
-        "time": 8
+        "time": 8,
+        "distance": 9
     },
     "longName": "kvv.live",
     "versionCode": 1,

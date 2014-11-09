@@ -11,6 +11,8 @@ struct stops {
 	unsigned int num;
 	sds *names;
 	sds *ids;
+	// Only set for proximity search.
+	int *distances;
 };
 
 // struct stops functions

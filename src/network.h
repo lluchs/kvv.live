@@ -15,6 +15,9 @@ enum {
 	DEPARTURE_KEY_ROUTE,
 	DEPARTURE_KEY_DESTINATION,
 	DEPARTURE_KEY_TIME,
+
+	// Extra info for stops.
+	STOP_KEY_DISTANCE,
 };
 
 // Actions

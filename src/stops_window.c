@@ -133,13 +133,16 @@ static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, ui
 
 // This is the menu item draw callback where you specify what each item should look like
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
+	static char dist_buf[10];
 	// Determine which section we're going to draw in
 	switch (cell_index->section) {
 		case 0: // proximity search
-			if (cell_index->row == 0)
+			if (cell_index->row == 0) {
 				menu_cell_basic_draw(ctx, cell_layer, "Search", proximity_status, NULL);
-			else
-				menu_cell_basic_draw(ctx, cell_layer, proximity_stops->names[cell_index->row - 1], NULL, NULL);
+			} else {
+				snprintf(dist_buf, 10, "%dm", proximity_stops->distances[cell_index->row - 1]);
+				menu_cell_basic_draw(ctx, cell_layer, proximity_stops->names[cell_index->row - 1], dist_buf, NULL);
+			}
 			break;
 		case 1: // favorites
 			menu_cell_basic_draw(ctx, cell_layer, favorite_stops->names[cell_index->row], NULL, NULL);

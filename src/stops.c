@@ -69,6 +69,10 @@ static void stops_clear(struct stops *stops) {
 	stops->names = NULL;
 	free(stops->ids);
 	stops->ids = NULL;
+	if (stops->distances) {
+		free(stops->distances);
+		stops->distances = NULL;
+	}
 }
 
 void stops_destroy(struct stops *stops) {
@@ -91,21 +95,23 @@ void stops_set_favorites_num(int num) {
 
 /* Sets the number of proximity stops in memory. */
 void stops_set_proximity_num(int num) {
-	proximity_stops.num = num;
-
 	if (proximity_stops.names)
 		stops_clear(&proximity_stops);
+
+	proximity_stops.num = num;
 
 	if (num > 0) {
 		// Allocate arrays.
 		proximity_stops.names = (sds*)malloc(num * sizeof(sds));
 		proximity_stops.ids = (sds*)malloc(num * sizeof(sds));
+		proximity_stops.distances = (int*)malloc(num * sizeof(int));
 	}
 }
 
-void add_proximity_stop(int i, sds name, sds id) {
+void add_proximity_stop(int i, sds name, sds id, int distance) {
 	proximity_stops.names[i] = sdsdup(name);
 	proximity_stops.ids[i] = sdsdup(id);
+	proximity_stops.distances[i] = distance;
 }
 
 /* Handles a stop message. */
@@ -113,6 +119,7 @@ void stops_receive_stop(DictionaryIterator *iter) {
 	int index = dict_find(iter, MSG_KEY_INDEX)->value->int32;
 	sds name = sdsnew(dict_find(iter, MSG_KEY_STOPNAME)->value->cstring);
 	sds id = sdsnew(dict_find(iter, MSG_KEY_STOPID)->value->cstring);
+	int distance;
 
 	int type = dict_find(iter, MSG_KEY_TYPE)->value->int32;
 	switch (type) {
@@ -120,7 +127,8 @@ void stops_receive_stop(DictionaryIterator *iter) {
 			add_favorite_stop(index, name, id);
 			break;
 		case MSG_TYPE_PROXIMITY:
-			add_proximity_stop(index, name, id);
+			distance = dict_find(iter, STOP_KEY_DISTANCE)->value->int32;
+			add_proximity_stop(index, name, id, distance);
 			break;
 		default:
 			APP_LOG(APP_LOG_LEVEL_ERROR, "Invalid type %d", type);
