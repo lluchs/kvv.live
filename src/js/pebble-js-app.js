@@ -41,7 +41,7 @@ Pebble.addEventListener('appmessage', function(e) {
       if (lastStopId == e.payload.stopId)
         transferDepartures(result.stopName, result.departures);
     });
-  } else if (e.payload.action == action('proximity').action) {
+  } else if (e.payload.action == action('reload_proximity_stops').action) {
     console.log('Doing proximity search...');
     proximitySearch();
   } else {
@@ -61,7 +61,7 @@ function proximitySearch() {
       sendMessage(extend(type('proximity'), {length: result.stops.length}), messageHandler('proximity length success'));
       sendMessages(result.stops.map(transformStop(type('proximity'))), function() {
         console.log('Sent ' + result.stops.length + ' stops.');
-        sendMessage(extend(action('reload_stops'), type('proximity')), messageHandler('sent reload proximity action'));
+        sendMessage(action('reload_proximity_stops'), messageHandler('sent reload proximity action'));
       });
     });
   }
@@ -81,7 +81,7 @@ function transferFavorites(favorites) {
   // Send favorites.
   sendMessages(favorites.map(transformStop(type('favorites'))), function() {
     console.log('Sent ' + favorites.length + ' favorites.');
-    sendMessage(extend(action('reload_stops'), type('favorites')), messageHandler('sent reload action'));
+    sendMessage(action('reload_favorite_stops'), messageHandler('sent reload action'));
   });
 }
 
@@ -221,8 +221,8 @@ function apiUrl(url) {
 /* Action encoding. */
 function action(act) {
   var actions = {
-    reload_stops: 0,
-    proximity: 1,
+    reload_favorite_stops: 0,
+    reload_proximity_stops: 1,
   };
   return {
     action: actions[act]

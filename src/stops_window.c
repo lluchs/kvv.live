@@ -15,6 +15,8 @@ static MenuLayer *menu;
 static struct stops const *proximity_stops;
 static struct stops *favorite_stops;
 
+static sds proximity_status;
+
 static void init_menu_layer();
 
 static void window_load(Window *window) {
@@ -38,6 +40,9 @@ static void show_departures(char *stop_id) {
 
 /* Request stops from the phone. */
 static void request_proxmity_stops() {
+	proximity_status = sdscpy(proximity_status, "Loading...");
+	menu_layer_reload_data(menu);
+
 	DictionaryIterator *iter;
 	app_message_outbox_begin(&iter);
 	Tuplet value = TupletInteger(MSG_KEY_ACTION, MSG_ACTION_RELOAD_PROXIMITY_STOPS);
@@ -48,6 +53,8 @@ static void request_proxmity_stops() {
 void stops_window_init() {
 	proximity_stops = get_proximity_stops();
 	favorite_stops = read_favorite_stops();
+
+	proximity_status = sdsnew("Select to update");
 
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) {
@@ -61,6 +68,7 @@ void stops_window_init() {
 void stops_window_deinit() {
 	stops_set_proximity_num(0);
 	stops_destroy(favorite_stops);
+	sdsfree(proximity_status);
 
 	window_destroy(window);
 }
@@ -72,6 +80,11 @@ void stops_window_reload_favorite_stops() {
 }
 
 void stops_window_reload_proximity_stops() {
+	static char time[10];
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "reload_proximity_stops");
+	clock_copy_time_string(time, 10);
+	proximity_status = sdscpy(proximity_status, "Updated at ");
+	proximity_status = sdscatlen(proximity_status, time, 10);
 	// The proximity stops are implicitly updated...
 	menu_layer_reload_data(menu);
 }
@@ -122,7 +135,7 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 	switch (cell_index->section) {
 		case 0: // proximity search
 			if (cell_index->row == 0)
-				menu_cell_basic_draw(ctx, cell_layer, "Search", NULL, NULL);
+				menu_cell_basic_draw(ctx, cell_layer, "Search", proximity_status, NULL);
 			else
 				menu_cell_basic_draw(ctx, cell_layer, proximity_stops->names[cell_index->row - 1], NULL, NULL);
 			break;
