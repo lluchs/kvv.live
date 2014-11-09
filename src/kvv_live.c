@@ -12,7 +12,18 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 		if (dict_find(iter, MSG_KEY_STOPNAME)) {
 			departures_window_receive_announcement(iter);
 		} else {
-			stops_set_num(dict_find(iter, MSG_KEY_LENGTH)->value->int32);
+			int num = dict_find(iter, MSG_KEY_LENGTH)->value->int32;
+			int type = dict_find(iter, MSG_KEY_TYPE)->value->int32;
+			switch (type) {
+				case MSG_TYPE_FAVORITES:
+					stops_set_favorites_num(num);
+					break;
+				case MSG_TYPE_PROXIMITY:
+					stops_set_proximity_num(num);
+					break;
+				default:
+					APP_LOG(APP_LOG_LEVEL_ERROR, "Invalid type %d", type);
+			}
 		}
 		return;
 	}
@@ -32,8 +43,11 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 	if ((tuple = dict_find(iter, MSG_KEY_ACTION))) {
 		int action = tuple->value->int32;
 		switch (action) {
-			case MSG_ACTION_RELOAD_STOPS:
-				stops_window_reload();
+			case MSG_ACTION_RELOAD_FAVORITE_STOPS:
+				stops_window_reload_favorite_stops();
+				break;
+			case MSG_ACTION_RELOAD_PROXIMITY_STOPS:
+				stops_window_reload_proximity_stops();
 				break;
 			default:
 				APP_LOG(APP_LOG_LEVEL_ERROR, "Invalid action %d", action);

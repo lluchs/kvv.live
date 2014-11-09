@@ -14,9 +14,11 @@ struct stops {
 };
 
 // struct stops functions
-struct stops* read_stops();
+struct stops const * get_proximity_stops();
+struct stops* read_favorite_stops();
 void stops_destroy(struct stops *stops);
 
 // messaging
-void stops_set_num(int num);
+void stops_set_favorites_num(int num);
+void stops_set_proximity_num(int num);
 void stops_receive_stop(DictionaryIterator *iter);

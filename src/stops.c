@@ -2,24 +2,31 @@
 #include "stops.h"
 #include "network.h"
 
+static struct stops proximity_stops;
+
 /* Adds the given stop to the persistant memory. */
-static void add_stop(int i, char *name, char *id) {
+static void add_favorite_stop(int i, char *name, char *id) {
 	int key = PERSIST_STOPS_START + i * 2;
 	persist_write_string(key, name);
 	persist_write_string(key + 1, id);
 }
 
 static void create_default_stops() {
-	stops_set_num(5);
-	add_stop(0, "KA Hbf Vorplatz", "de:8212:89");
-	add_stop(1, "KA Durlacher Tor", "de:8212:3");
-	add_stop(2, "KA Marktplatz (Kaiserstr)", "de:8212:1");
-	add_stop(3, "KA ZKM", "de:8212:65");
-	add_stop(4, "KA Entenfang", "de:8212:51");
+	stops_set_favorites_num(5);
+	add_favorite_stop(0, "KA Hbf Vorplatz", "de:8212:89");
+	add_favorite_stop(1, "KA Durlacher Tor", "de:8212:3");
+	add_favorite_stop(2, "KA Marktplatz (Kaiserstr)", "de:8212:1");
+	add_favorite_stop(3, "KA ZKM", "de:8212:65");
+	add_favorite_stop(4, "KA Entenfang", "de:8212:51");
+}
+
+/* Returns the stops requested from proximity search. */
+struct stops const * get_proximity_stops() {
+	return &proximity_stops;
 }
 
 /* Reads stops from persistent memory. */
-struct stops* read_stops() {
+struct stops* read_favorite_stops() {
 	if (!persist_read_int(PERSIST_STOPS_LENGTH)) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "No stops found, creating default ones...");
 		create_default_stops();
@@ -53,18 +60,22 @@ struct stops* read_stops() {
 	return stops;
 }
 
-void stops_destroy(struct stops *stops) {
+static void stops_clear(struct stops *stops) {
 	for (unsigned int i = 0; i < stops->num; i++) {
 		sdsfree(stops->names[i]);
 		sdsfree(stops->ids[i]);
 	}
 	free(stops->names);
 	free(stops->ids);
+}
+
+void stops_destroy(struct stops *stops) {
+	stops_clear(stops);
 	free(stops);
 }
 
 /* Saves the given number of stops in persistant memory. */
-void stops_set_num(int num) {
+void stops_set_favorites_num(int num) {
 	if (persist_exists(PERSIST_STOPS_LENGTH)) {
 		int prevnum = persist_read_int(PERSIST_STOPS_LENGTH);
 		// Remove obsolete entries.
@@ -76,13 +87,42 @@ void stops_set_num(int num) {
 	persist_write_int(PERSIST_STOPS_LENGTH, num);
 }
 
+/* Sets the number of proximity stops in memory. */
+void stops_set_proximity_num(int num) {
+	proximity_stops.num = num;
+
+	if (proximity_stops.names)
+		stops_clear(&proximity_stops);
+
+	if (num > 0) {
+		// Allocate arrays.
+		proximity_stops.names = (sds*)malloc(num * sizeof(sds));
+		proximity_stops.ids = (sds*)malloc(num * sizeof(sds));
+	}
+}
+
+void add_proximity_stop(int i, sds name, sds id) {
+	proximity_stops.names[i] = sdsdup(name);
+	proximity_stops.ids[i] = sdsdup(id);
+}
+
 /* Handles a stop message. */
 void stops_receive_stop(DictionaryIterator *iter) {
 	int index = dict_find(iter, MSG_KEY_INDEX)->value->int32;
 	sds name = sdsnew(dict_find(iter, MSG_KEY_STOPNAME)->value->cstring);
 	sds id = sdsnew(dict_find(iter, MSG_KEY_STOPID)->value->cstring);
 
-	add_stop(index, name, id);
+	int type = dict_find(iter, MSG_KEY_TYPE)->value->int32;
+	switch (type) {
+		case MSG_TYPE_FAVORITES:
+			add_favorite_stop(index, name, id);
+			break;
+		case MSG_TYPE_PROXIMITY:
+			add_proximity_stop(index, name, id);
+			break;
+		default:
+			APP_LOG(APP_LOG_LEVEL_ERROR, "Invalid type %d", type);
+	}
 
 	sdsfree(name);
 	sdsfree(id);

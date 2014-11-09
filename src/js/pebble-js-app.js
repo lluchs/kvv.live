@@ -41,29 +41,59 @@ Pebble.addEventListener('appmessage', function(e) {
       if (lastStopId == e.payload.stopId)
         transferDepartures(result.stopName, result.departures);
     });
+  } else if (e.payload.action == action('proximity').action) {
+    console.log('Doing proximity search...');
+    proximitySearch();
   } else {
     console.log('Received unknown message: ' + JSON.stringify(e.payload));
   }
 });
 
+/* Does a proximity search. */
+function proximitySearch() {
+  var locationOptions = {
+    maximumAge: 10000, 
+    timeout: 10000,
+  };
+
+  function locationSuccess(pos) {
+    getJSON(apiUrl('http://live.kvv.de/webapp/stops/bylatlon/' + pos.coords.latitude + '/' + pos.coords.longitude), function(result) {
+      sendMessage(extend(type('proximity'), {length: result.stops.length}), messageHandler('proximity length success'));
+      sendMessages(result.stops.map(transformStop(type('proximity'))), function() {
+        console.log('Sent ' + result.stops.length + ' stops.');
+        sendMessage(extend(action('reload_stops'), type('proximity')), messageHandler('sent reload proximity action'));
+      });
+    });
+  }
+
+  function locationError(err) {
+    console.log('location error (' + err.code + '): ' + err.message);
+  }
+
+  // Request current position
+  navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
+}
+
 /* Transfers favorite stops to Pebble. */
 function transferFavorites(favorites) {
   // Send the number of favorites.
-  sendMessage({length: favorites.length}, messageHandler('favorites length success'));
+  sendMessage(extend(type('favorites'), {length: favorites.length}), messageHandler('favorites length success'));
   // Send favorites.
-  sendMessages(favorites.map(transformStop), function() {
+  sendMessages(favorites.map(transformStop(type('favorites'))), function() {
     console.log('Sent ' + favorites.length + ' favorites.');
-    sendMessage(action('reload_stops'), messageHandler('sent reload action'));
+    sendMessage(extend(action('reload_stops'), type('favorites')), messageHandler('sent reload action'));
   });
 }
 
 /* Transforms the stop to a pebble message. */
-function transformStop(stop, i) {
-  return {
-    index: i,
-    stopName: transformStopName(stop.name),
-    stopId: stop.id
-  };
+function transformStop(params) {
+  return function(stop, i) {
+    return extend({
+      index: i,
+      stopName: transformStopName(stop.name),
+      stopId: stop.id
+    }, params);
+  }
 }
 
 /* Transfers departures to Pebble. */
@@ -154,14 +184,27 @@ function messageHandler(msg) {
 
 /* Requests departures from the API. */
 function getDepartures(stopId, then) {
+  getJSON(apiUrl('http://live.kvv.de/webapp/departures/bystop/'+stopId+'?maxInfos=10'), then, function(res) {
+    if (res.status == 400) {
+      then({
+        stopName: 'No info available.',
+        departures: [],
+      });
+    }
+  });
+}
+
+// Performs a HTTP GET request, parsing JSON.
+function getJSON(url, then, errthen) {
   var req = new XMLHttpRequest();
-  req.open('GET', apiUrl('http://live.kvv.de/webapp/departures/bystop/'+stopId+'?maxInfos=10'), true);
+  req.open('GET', url, true);
   req.onload = function(e) {
     if (req.readyState == 4 && req.status == 200) {
       var response = JSON.parse(req.responseText);
       then(response);
     } else {
-      console.error('Could not get departures', req.status);
+      console.error('getJSON error', req.status);
+      if (errthen) errthen(req);
     }
   };
   req.send();
@@ -169,16 +212,31 @@ function getDepartures(stopId, then) {
 
 /* Adds the API key to an URL. */
 function apiUrl(url) {
-  return url + '&key=' + API_KEY;
+  if (url.indexOf('?') == -1)
+    return url + '?key=' + API_KEY;
+  else
+    return url + '&key=' + API_KEY;
 }
 
 /* Action encoding. */
 function action(act) {
   var actions = {
     reload_stops: 0,
+    proximity: 1,
   };
   return {
     action: actions[act]
+  };
+}
+
+/* Type encoding. */
+function type(tp) {
+  var types = {
+    favorites: 0,
+    proximity: 1,
+  };
+  return {
+    type: types[tp]
   };
 }
 
@@ -191,6 +249,15 @@ function rest(array) {
 }
 
 function noop() {}
+
+function extend() {
+  return Array.prototype.slice.call(arguments).reduce(function(a, b) {
+    for (var key in b) {
+      a[key] = b[key];
+    }
+    return a;
+  });
+}
 
 /* UTF-8 <-> Base64 encoding. */
 function b64_to_utf8(str) {

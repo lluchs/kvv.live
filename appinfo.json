@@ -7,14 +7,16 @@
         "stopName": 2,
         "stopId": 3,
         "action": 4,
-        "route": 5,
-        "destination": 6,
-        "time": 7
+        "type": 5,
+        "route": 6,
+        "destination": 7,
+        "time": 8
     },
     "longName": "kvv.live",
     "versionCode": 1,
     "capabilities": [
-        "configurable"
+        "configurable",
+        "location"
     ],
     "shortName": "kvv.live",
     "companyName": "Lukas Werling",

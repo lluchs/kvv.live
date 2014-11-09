@@ -7,11 +7,13 @@
 #include "stops_window.h"
 #include "departures_window.h"
 #include "stops.h"
+#include "network.h"
 
 static Window *window;
 static MenuLayer *menu;
 
-static struct stops *stops;
+static struct stops const *proximity_stops;
+static struct stops *favorite_stops;
 
 static void init_menu_layer();
 
@@ -29,14 +31,23 @@ static void window_unload(Window *window) {
 	menu_layer_destroy(menu);
 }
 
-static void show_departures(int index) {
-	char *stop_id = stops->ids[index];
+static void show_departures(char *stop_id) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "Showing departures for station %s.", stop_id);
 	departures_window_show(stop_id);
 }
 
+/* Request stops from the phone. */
+static void request_proxmity_stops() {
+	DictionaryIterator *iter;
+	app_message_outbox_begin(&iter);
+	Tuplet value = TupletInteger(MSG_KEY_ACTION, MSG_ACTION_RELOAD_PROXIMITY_STOPS);
+	dict_write_tuplet(iter, &value);
+	app_message_outbox_send();
+}
+
 void stops_window_init() {
-	stops = read_stops();
+	proximity_stops = get_proximity_stops();
+	favorite_stops = read_favorite_stops();
 
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) {
@@ -48,14 +59,20 @@ void stops_window_init() {
 }
 
 void stops_window_deinit() {
-	stops_destroy(stops);
+	stops_set_proximity_num(0);
+	stops_destroy(favorite_stops);
 
 	window_destroy(window);
 }
 
-void stops_window_reload() {
-	stops_destroy(stops);
-	stops = read_stops();
+void stops_window_reload_favorite_stops() {
+	stops_destroy(favorite_stops);
+	favorite_stops = read_favorite_stops();
+	menu_layer_reload_data(menu);
+}
+
+void stops_window_reload_proximity_stops() {
+	// The proximity stops are implicitly updated...
 	menu_layer_reload_data(menu);
 }
 
@@ -64,15 +81,17 @@ void stops_window_reload() {
 // A callback is used to specify the amount of sections of menu items
 // With this, you can dynamically add and remove sections
 static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) {
-  return 1;
+  return 2;
 }
 
 // Each section has a number of items;  we use a callback to specify this
 // You can also dynamically add and remove items using this
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
 	switch (section_index) {
-		case 0: // favorites
-			return stops->num;
+		case 0: // proximity search
+			return 1 + proximity_stops->num;
+		case 1: // favorites
+			return favorite_stops->num;
 
 		default:
 			return 0;
@@ -89,7 +108,9 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
 static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
 	switch (section_index) {
 		case 0:
-			// Draw title text in the section header
+			menu_cell_basic_header_draw(ctx, cell_layer, "Proximity search");
+			break;
+		case 1:
 			menu_cell_basic_header_draw(ctx, cell_layer, "Favorites");
 			break;
 	}
@@ -99,8 +120,14 @@ static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, ui
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
 	// Determine which section we're going to draw in
 	switch (cell_index->section) {
-		case 0: // favorites
-			menu_cell_basic_draw(ctx, cell_layer, stops->names[cell_index->row], NULL, NULL);
+		case 0: // proximity search
+			if (cell_index->row == 0)
+				menu_cell_basic_draw(ctx, cell_layer, "Search", NULL, NULL);
+			else
+				menu_cell_basic_draw(ctx, cell_layer, proximity_stops->names[cell_index->row - 1], NULL, NULL);
+			break;
+		case 1: // favorites
+			menu_cell_basic_draw(ctx, cell_layer, favorite_stops->names[cell_index->row], NULL, NULL);
 			break;
 	}
 }
@@ -109,8 +136,14 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
 	// Use the row to specify which item will receive the select action
 	switch (cell_index->section) {
-		case 0: // favorites
-			show_departures(cell_index->row);
+		case 0: // proximity search
+			if (cell_index->row == 0)
+				request_proxmity_stops();
+			else
+				show_departures(proximity_stops->ids[cell_index->row - 1]);
+			break;
+		case 1: // favorites
+			show_departures(favorite_stops->ids[cell_index->row]);
 			break;
 	}
 
