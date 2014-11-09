@@ -41,6 +41,8 @@ static void show_departures(char *stop_id) {
 /* Request stops from the phone. */
 static void request_proxmity_stops() {
 	proximity_status = sdscpy(proximity_status, "Loading...");
+	// Clear existing stops to prevent invalid menu entries.
+	stops_set_proximity_num(0);
 	menu_layer_reload_data(menu);
 
 	DictionaryIterator *iter;

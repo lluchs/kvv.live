@@ -66,7 +66,9 @@ static void stops_clear(struct stops *stops) {
 		sdsfree(stops->ids[i]);
 	}
 	free(stops->names);
+	stops->names = NULL;
 	free(stops->ids);
+	stops->ids = NULL;
 }
 
 void stops_destroy(struct stops *stops) {
