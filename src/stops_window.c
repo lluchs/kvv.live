@@ -175,4 +175,6 @@ static void init_menu_layer() {
 		.select_click = menu_select_callback,
 	});
 	menu_layer_set_click_config_onto_window(menu, window);
+	// Select the first favorite station.
+	menu_layer_set_selected_index(menu, (MenuIndex){.section = 1, .row = 0}, MenuRowAlignNone, false);
 }
