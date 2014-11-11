@@ -54,6 +54,17 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 		}
 		return;
 	}
+
+	// Errors
+	if ((tuple = dict_find(iter, MSG_KEY_ERROR))) {
+		int type = dict_find(iter, MSG_KEY_TYPE)->value->int32;
+		switch (type) {
+			case MSG_TYPE_PROXIMITY:
+				show_proximity_error(tuple->value->cstring);
+			default:
+				APP_LOG(APP_LOG_LEVEL_ERROR, "Invalid error type %d", type);
+		}
+	}
 }
 
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {

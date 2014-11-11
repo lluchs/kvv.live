@@ -2,8 +2,11 @@
 
 var API_KEY = '377d840e54b59adbe53608ba1aad70e8';
 
-// This function makes sure that there's only one transfer at a time.
-var stopPreviousTransfer = noop;
+// These functions make sure that there's only one transfer at a time.
+var stopPreviousTransfer = {
+  proximity: noop,
+  departures: noop,
+};
 
 // Called when the JS app is ready.
 Pebble.addEventListener('ready', function(e) {
@@ -34,7 +37,7 @@ Pebble.addEventListener('appmessage', function(e) {
   if ('stopId' in e.payload) {
     console.log('Received stopId', e.payload.stopId);
     lastStopId = e.payload.stopId;
-    stopPreviousTransfer();
+    stopPreviousTransfer.departures();
     getDepartures(e.payload.stopId, function(result) {
       // Make sure that there wasn't a second request while we were waiting for
       // an answer.
@@ -43,6 +46,7 @@ Pebble.addEventListener('appmessage', function(e) {
     });
   } else if (e.payload.action == action('reload_proximity_stops').action) {
     console.log('Doing proximity search...');
+    stopPreviousTransfer.proximity();
     proximitySearch();
   } else {
     console.log('Received unknown message: ' + JSON.stringify(e.payload));
@@ -59,10 +63,12 @@ function proximitySearch() {
   function locationSuccess(pos) {
     getJSON(apiUrl('http://live.kvv.de/webapp/stops/bylatlon/' + pos.coords.latitude + '/' + pos.coords.longitude), function(result) {
       sendMessage(extend(type('proximity'), {length: result.stops.length}), messageHandler('proximity length success'));
-      sendMessages(result.stops.map(transformStop(type('proximity'))), function() {
+      stopPreviousTransfer.proximity = sendMessages(result.stops.map(transformStop(type('proximity'))), function() {
         console.log('Sent ' + result.stops.length + ' stops.');
         sendMessage(action('reload_proximity_stops'), messageHandler('sent reload proximity action'));
       });
+    }, function(res) {
+      sendMessage(extend(type('proximity'), {error: 'Error: HTTP ' + res.status}), messageHandler('proximity error'));
     });
   }
 
@@ -105,7 +111,7 @@ function transferDepartures(stopName, departures) {
   // First, send the number of departures.
   sendMessage({stopName: transformStopName(stopName), length: departures.length}, messageHandler('length success'));
   // Departures are transfered one at a time.
-  stopPreviousTransfer = sendMessages(departures.map(transformDeparture), function() {
+  stopPreviousTransfer.departures = sendMessages(departures.map(transformDeparture), function() {
     console.log('Sent ' + departures.length + ' departures.');
   });
 }
@@ -189,12 +195,17 @@ function messageHandler(msg) {
 /* Requests departures from the API. */
 function getDepartures(stopId, then) {
   getJSON(apiUrl('http://live.kvv.de/webapp/departures/bystop/'+stopId+'?maxInfos=10'), then, function(res) {
+    var message;
     if (res.status == 400) {
-      then({
-        stopName: 'No info available.',
-        departures: [],
-      });
+      message = 'No info available.';
+    } else {
+      // Unknown error.
+      message = 'Error: HTTP ' + res.status;
     }
+    then({
+      stopName: message,
+      departures: [],
+    });
   });
 }
 

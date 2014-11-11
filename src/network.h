@@ -10,6 +10,7 @@ enum {
 	MSG_KEY_STOPID,
 	MSG_KEY_ACTION,
 	MSG_KEY_TYPE,
+	MSG_KEY_ERROR,
 
 	// Single departure.
 	DEPARTURE_KEY_ROUTE,

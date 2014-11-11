@@ -8,10 +8,11 @@
         "stopId": 3,
         "action": 4,
         "type": 5,
-        "route": 6,
-        "destination": 7,
-        "time": 8,
-        "distance": 9
+        "error": 6,
+        "route": 7,
+        "destination": 8,
+        "time": 9,
+        "distance": 10
     },
     "longName": "kvv.live",
     "versionCode": 1,

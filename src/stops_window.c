@@ -91,6 +91,12 @@ void stops_window_reload_proximity_stops() {
 	menu_layer_reload_data(menu);
 }
 
+// Shows the given error as status below the Search button.
+void show_proximity_error(char *error) {
+	proximity_status = sdscpy(proximity_status, error);
+	menu_layer_reload_data(menu);
+}
+
 /* Menu callbacks */
 
 // A callback is used to specify the amount of sections of menu items
