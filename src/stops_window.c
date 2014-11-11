@@ -16,6 +16,7 @@ static struct stops const *proximity_stops;
 static struct stops *favorite_stops;
 
 static sds proximity_status;
+static bool proximity_loading;
 
 static void init_menu_layer();
 
@@ -40,6 +41,13 @@ static void show_departures(char *stop_id) {
 
 /* Request stops from the phone. */
 static void request_proxmity_stops() {
+	if (proximity_loading) {
+		// Don't allow multiple concurrent requests.
+		proximity_status = sdscpy(proximity_status, "Still loading...");
+		menu_layer_reload_data(menu);
+		return;
+	}
+	proximity_loading = true;
 	proximity_status = sdscpy(proximity_status, "Loading...");
 	// Clear existing stops to prevent invalid menu entries.
 	stops_set_proximity_num(0);
@@ -87,6 +95,7 @@ void stops_window_reload_proximity_stops() {
 	clock_copy_time_string(time, 10);
 	proximity_status = sdscpy(proximity_status, "Updated at ");
 	proximity_status = sdscatlen(proximity_status, time, 10);
+	proximity_loading = false;
 	// The proximity stops are implicitly updated...
 	menu_layer_reload_data(menu);
 }
@@ -94,6 +103,7 @@ void stops_window_reload_proximity_stops() {
 // Shows the given error as status below the Search button.
 void show_proximity_error(char *error) {
 	proximity_status = sdscpy(proximity_status, error);
+	proximity_loading = false;
 	menu_layer_reload_data(menu);
 }
 
@@ -110,6 +120,8 @@ static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
 	switch (section_index) {
 		case 0: // proximity search
+			// Don't show partially loaded data.
+			if (proximity_loading) return 1;
 			return 1 + proximity_stops->num;
 		case 1: // favorites
 			return favorite_stops->num;
