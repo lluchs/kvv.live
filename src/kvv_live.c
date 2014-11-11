@@ -69,8 +69,10 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "Could not send message");
-	// Right now, only the departures window sends any messages.
+
+	// Errors may occur when loading proximity stops or departures.
 	departures_window_handle_error();
+	show_proximity_error("Error: No connection");
 }
 
 static void app_message_init() {

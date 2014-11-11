@@ -102,6 +102,8 @@ void stops_window_reload_proximity_stops() {
 
 // Shows the given error as status below the Search button.
 void show_proximity_error(char *error) {
+	// False alarm if we're not loading anything.
+	if (!proximity_loading) return;
 	proximity_status = sdscpy(proximity_status, error);
 	proximity_loading = false;
 	menu_layer_reload_data(menu);

@@ -137,7 +137,8 @@ void departures_window_receive_departure(DictionaryIterator *iter) {
 }
 
 void departures_window_handle_error() {
-	text_layer_set_text(title_layer, "ERROR: No conn.");
+	if (title_layer)
+		text_layer_set_text(title_layer, "ERROR: No conn.");
 }
 
 void departures_window_init() {
