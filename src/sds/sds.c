@@ -32,7 +32,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
 
 #include "sds.h"
 
@@ -200,10 +199,8 @@ size_t sdsAllocSize(sds s) {
 void sdsIncrLen(sds s, int incr) {
     struct sdshdr *sh = (void*) (s-sizeof *sh);;
 
-    assert(sh->free >= incr);
     sh->len += incr;
     sh->free -= incr;
-    assert(sh->free >= 0);
     s[sh->len] = '\0';
 }
 
