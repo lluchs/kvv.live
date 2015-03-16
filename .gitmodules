@@ -1,3 +1,0 @@
-[submodule "src/sds"]
-	path = src/sds
-	url = git://github.com/lluchs/sds
