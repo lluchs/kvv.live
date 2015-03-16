@@ -1,38 +1,43 @@
 {
-    "versionLabel": "1.1",
-    "uuid": "c7767843-ec00-4655-9f35-93c90347134d",
-    "appKeys": {
-        "length": 0,
-        "index": 1,
-        "stopName": 2,
-        "stopId": 3,
-        "action": 4,
-        "type": 5,
-        "error": 6,
-        "route": 7,
-        "destination": 8,
-        "time": 9,
-        "distance": 10
-    },
-    "longName": "kvv.live",
-    "versionCode": 1,
-    "capabilities": [
-        "configurable",
-        "location"
-    ],
-    "shortName": "kvv.live",
-    "companyName": "Lukas Werling",
-    "watchapp": {
-        "watchface": false
-    },
-    "resources": {
-        "media": [
-            {
-                "menuIcon": true,
-                "type": "png",
-                "name": "KVV_LOGO",
-                "file": "images/kvv_logo.png"
-            }
-        ]
-    }
+  "versionLabel": "1.1",
+  "uuid": "c7767843-ec00-4655-9f35-93c90347134d",
+  "appKeys": {
+    "length": 0,
+    "index": 1,
+    "stopName": 2,
+    "stopId": 3,
+    "action": 4,
+    "type": 5,
+    "error": 6,
+    "route": 7,
+    "destination": 8,
+    "time": 9,
+    "distance": 10
+  },
+  "longName": "kvv.live",
+  "versionCode": 1,
+  "capabilities": [
+    "configurable",
+    "location"
+  ],
+  "shortName": "kvv.live",
+  "companyName": "Lukas Werling",
+  "watchapp": {
+    "watchface": false
+  },
+  "resources": {
+    "media": [
+      {
+        "menuIcon": true,
+        "type": "png",
+        "name": "KVV_LOGO",
+        "file": "images/kvv_logo.png"
+      }
+    ]
+  },
+  "targetPlatforms": [
+    "aplite",
+    "basalt"
+  ],
+  "sdkVersion": "3"
 }
