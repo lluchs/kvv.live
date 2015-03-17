@@ -25,4 +25,5 @@ void departure_deserialize(DictionaryIterator *iter, struct Departure *departure
 
 struct DepartureLine* departure_line_create(const struct Departure *d, GRect frame);
 
+void departure_line_update(struct DepartureLine *line);
 void departure_line_destroy(struct DepartureLine *line);

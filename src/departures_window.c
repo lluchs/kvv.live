@@ -131,6 +131,7 @@ void departures_window_receive_departure(DictionaryIterator *iter) {
 	// It might not if the user is switching stops very fast.
 	if (lines[index]) {
 		departure_deserialize(iter, &departures[index]);
+		departure_line_update(lines[index]);
 		// Initiate a redraw of the given departure.
 		layer_mark_dirty(lines[index]->layer);
 	}
