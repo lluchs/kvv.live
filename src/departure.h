@@ -21,8 +21,6 @@
 
 #include "network.h"
 
-#define DEPARTURE_HEIGHT 19
-
 struct Departure {
 	char route[4];
 	char destination[20];
@@ -38,6 +36,7 @@ struct DepartureLine {
 
 void departure_deserialize(DictionaryIterator *iter, struct Departure *departure);
 
+int departure_height();
 struct DepartureLine* departure_line_create(const struct Departure *d, GRect frame);
 
 void departure_line_update(struct DepartureLine *line);

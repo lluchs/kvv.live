@@ -93,7 +93,7 @@ static void create_lines(int length) {
 		length = DEPARTURE_LINES;
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
-	const int line_height = DEPARTURE_HEIGHT + 1;
+	const int line_height = departure_height() + 1;
 	int i;
 	for (i = 0; i < length; i++) {
 		// Lazily create departure lines.

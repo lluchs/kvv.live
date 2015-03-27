@@ -16,6 +16,8 @@
 #include <ctype.h>
 #include "departure.h"
 
+#define DEPARTURE_HEIGHT 19
+
 /**
  * Deserializes departure values as received.
  *
@@ -94,6 +96,10 @@ static struct route_color get_color_for_route(const char *route) {
 	return (struct route_color) {.bg = GColorBlack, .fg = GColorWhite};
 }
 #endif
+
+int departure_height() {
+	return DEPARTURE_HEIGHT;
+}
 
 /**
  * Draws a departure line.
