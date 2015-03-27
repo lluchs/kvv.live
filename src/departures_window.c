@@ -8,6 +8,7 @@ static Window *window;
 static ScrollLayer *scroll_layer;
 
 static char stopId[20];
+static time_t request_time;
 
 #define TITLE_LENGTH 30
 static char title[TITLE_LENGTH];
@@ -24,6 +25,7 @@ static struct Departure departures[DEPARTURE_LINES];
  */
 static void request_departures() {
 	text_layer_set_text(title_layer, "Loading...");
+	request_time = time(NULL);
 
 	DictionaryIterator *iter;
 	app_message_outbox_begin(&iter);
@@ -115,6 +117,13 @@ void departures_window_receive_announcement(DictionaryIterator *iter) {
 	strncpy(title, name_tuple->value->cstring, TITLE_LENGTH);
 	title[TITLE_LENGTH - 1] = '\0';
 	text_layer_set_text(title_layer, title);
+
+	// Notify the user that loading has finished.
+	light_enable_interaction();
+	// Also vibrate if loading took a long time. Make sure to vibrate only once.
+	if (request_time && time(NULL) - request_time > 2)
+		vibes_short_pulse();
+	request_time = 0;
 
 	// We're done, a length message does not contain anything else.
 }
