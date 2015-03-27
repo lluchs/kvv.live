@@ -24,6 +24,7 @@
 #include "departures_window.h"
 #include "stops.h"
 #include "network.h"
+#include "settings_window.h"
 
 static Window *window;
 static MenuLayer *menu;
@@ -95,6 +96,7 @@ void stops_window_deinit() {
 	stops_set_proximity_num(0);
 	stops_destroy(favorite_stops);
 	sdsfree(proximity_status);
+	settings_window_deinit();
 
 	window_destroy(window);
 }
@@ -130,7 +132,7 @@ void show_proximity_error(char *error) {
 // A callback is used to specify the amount of sections of menu items
 // With this, you can dynamically add and remove sections
 static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) {
-  return 2;
+  return 3;
 }
 
 // Each section has a number of items;  we use a callback to specify this
@@ -143,6 +145,8 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t secti
 			return 1 + proximity_stops->num;
 		case 1: // favorites
 			return favorite_stops->num;
+		case 2: // settings
+			return 1;
 
 		default:
 			return 0;
@@ -164,6 +168,9 @@ static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, ui
 		case 1:
 			menu_cell_basic_header_draw(ctx, cell_layer, _("Favorites"));
 			break;
+		case 2:
+			menu_cell_basic_header_draw(ctx, cell_layer, _("Settings"));
+			break;
 	}
 }
 
@@ -183,11 +190,14 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 		case 1: // favorites
 			menu_cell_basic_draw(ctx, cell_layer, favorite_stops->names[cell_index->row], NULL, NULL);
 			break;
+		case 2: // settings
+			menu_cell_basic_draw(ctx, cell_layer, _("Settings"), NULL, NULL);
+			break;
 	}
 }
 
 // Here we capture when a user selects a menu item
-void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
 	// Use the row to specify which item will receive the select action
 	switch (cell_index->section) {
 		case 0: // proximity search
@@ -199,6 +209,9 @@ void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *da
 		case 1: // favorites
 			show_departures(favorite_stops->ids[cell_index->row]);
 			break;
+		case 2: // settings
+			settings_window_init();
+			settings_window_show();
 	}
 
 }

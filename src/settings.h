@@ -23,3 +23,4 @@ enum {
 
 bool get_setting(int which);
 void set_setting(int which, bool to);
+void toggle_setting(int which);
