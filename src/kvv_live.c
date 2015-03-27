@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "locale_framework/localize.h"
 #include "network.h"
 #include "departures_window.h"
 #include "stops_window.h"
@@ -72,7 +73,7 @@ static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reas
 
 	// Errors may occur when loading proximity stops or departures.
 	departures_window_handle_error();
-	show_proximity_error("Error: No connection");
+	show_proximity_error(_("Error: No connection"));
 }
 
 static void app_message_init() {
@@ -82,6 +83,7 @@ static void app_message_init() {
 }
 
 static void init(void) {
+	locale_init();
 	app_message_init();
 	stops_window_init();
 	departures_window_init();

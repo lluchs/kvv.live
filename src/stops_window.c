@@ -3,6 +3,7 @@
 #include <pebble.h>
 
 #include "sds/sds.h"
+#include "locale_framework/localize.h"
 
 #include "stops_window.h"
 #include "departures_window.h"
@@ -43,12 +44,12 @@ static void show_departures(char *stop_id) {
 static void request_proxmity_stops() {
 	if (proximity_loading) {
 		// Don't allow multiple concurrent requests.
-		proximity_status = sdscpy(proximity_status, "Still loading...");
+		proximity_status = sdscpy(proximity_status, _("Still loading..."));
 		menu_layer_reload_data(menu);
 		return;
 	}
 	proximity_loading = true;
-	proximity_status = sdscpy(proximity_status, "Loading...");
+	proximity_status = sdscpy(proximity_status, _("Loading..."));
 	// Clear existing stops to prevent invalid menu entries.
 	stops_set_proximity_num(0);
 	menu_layer_reload_data(menu);
@@ -64,7 +65,7 @@ void stops_window_init() {
 	proximity_stops = get_proximity_stops();
 	favorite_stops = read_favorite_stops();
 
-	proximity_status = sdsnew("Select to update");
+	proximity_status = sdsnew(_("Select to update"));
 
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) {
@@ -93,7 +94,7 @@ void stops_window_reload_proximity_stops() {
 	static char time[10];
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "reload_proximity_stops");
 	clock_copy_time_string(time, 10);
-	proximity_status = sdscpy(proximity_status, "Updated at ");
+	proximity_status = sdscpy(proximity_status, _("Updated at "));
 	proximity_status = sdscatlen(proximity_status, time, 10);
 	proximity_loading = false;
 	// The proximity stops are implicitly updated...
@@ -143,10 +144,10 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
 static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
 	switch (section_index) {
 		case 0:
-			menu_cell_basic_header_draw(ctx, cell_layer, "Proximity search");
+			menu_cell_basic_header_draw(ctx, cell_layer, _("Proximity search"));
 			break;
 		case 1:
-			menu_cell_basic_header_draw(ctx, cell_layer, "Favorites");
+			menu_cell_basic_header_draw(ctx, cell_layer, _("Favorites"));
 			break;
 	}
 }
@@ -158,7 +159,7 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 	switch (cell_index->section) {
 		case 0: // proximity search
 			if (cell_index->row == 0) {
-				menu_cell_basic_draw(ctx, cell_layer, "Search", proximity_status, NULL);
+				menu_cell_basic_draw(ctx, cell_layer, _("Search"), proximity_status, NULL);
 			} else {
 				snprintf(dist_buf, 10, "%dm", proximity_stops->distances[cell_index->row - 1]);
 				menu_cell_basic_draw(ctx, cell_layer, proximity_stops->names[cell_index->row - 1], dist_buf, NULL);

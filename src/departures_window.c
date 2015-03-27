@@ -1,6 +1,7 @@
 /* Window showing departures. */
 
 #include <pebble.h>
+#include "locale_framework/localize.h"
 #include "departures_window.h"
 #include "departure.h"
 
@@ -24,7 +25,7 @@ static struct Departure departures[DEPARTURE_LINES];
  * Request departures of the current stop.
  */
 static void request_departures() {
-	text_layer_set_text(title_layer, "Loading...");
+	text_layer_set_text(title_layer, _("Loading..."));
 	request_time = time(NULL);
 
 	DictionaryIterator *iter;
@@ -148,7 +149,7 @@ void departures_window_receive_departure(DictionaryIterator *iter) {
 
 void departures_window_handle_error() {
 	if (title_layer)
-		text_layer_set_text(title_layer, "ERROR: No conn.");
+		text_layer_set_text(title_layer, _("ERROR: No conn."));
 }
 
 void departures_window_init() {
