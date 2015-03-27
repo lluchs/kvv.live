@@ -19,6 +19,7 @@
 #include "locale_framework/localize.h"
 #include "departures_window.h"
 #include "departure.h"
+#include "settings.h"
 
 static Window *window;
 static ScrollLayer *scroll_layer;
@@ -137,7 +138,7 @@ void departures_window_receive_announcement(DictionaryIterator *iter) {
 	// Notify the user that loading has finished.
 	light_enable_interaction();
 	// Also vibrate if loading took a long time. Make sure to vibrate only once.
-	if (request_time && time(NULL) - request_time > 2)
+	if (get_setting(SETTING_VIBRATE) && request_time && time(NULL) - request_time > 2)
 		vibes_short_pulse();
 	request_time = 0;
 
