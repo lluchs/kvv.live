@@ -13,28 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#pragma once
+
 #include <pebble.h>
-#include "settings.h"
+#include "departure.h"
 
-// Default values / cache.
-static bool settings[] = {
-	false, // ignored
-	true,  // SETTING_VIBRATE
-	false, // SETTING_COMPACT_DEPARTURES
-};
+void departure_layout_update(struct DepartureLine *line);
+void departure_layout_destroy(struct DepartureLine *line);
 
-bool get_setting(int which) {
-	const int index = which - _SETTING_FIRST;
-	if (persist_exists(which))
-		settings[index] = persist_read_bool(which);
-	return settings[index];
-}
-
-void set_setting(int which, bool to) {
-	persist_write_bool(which, to);
-	settings[which - _SETTING_FIRST] = to;
-}
-
-void toggle_setting(int which) {
-	set_setting(which, !get_setting(which));
-}

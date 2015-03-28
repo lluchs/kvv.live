@@ -42,7 +42,10 @@ void departure_deserialize(DictionaryIterator *iter, struct Departure *departure
 }
 
 static struct departure_layout* get_layout() {
-	return &departure_layout_oneline;
+	if (get_setting(SETTING_COMPACT_DEPARTURES))
+		return &departure_layout_oneline;
+	else
+		return &departure_layout_twoline;
 }
 
 int departure_height() {

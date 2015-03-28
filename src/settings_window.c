@@ -23,7 +23,8 @@ static Window *window;
 static MenuLayer *menu;
 
 static const char* settings[] = {
-	"Vibration"
+	"Vibration",
+	"Single line",
 };
 
 static void init_menu_layer();

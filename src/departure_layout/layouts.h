@@ -26,4 +26,4 @@ struct departure_layout {
 };
 
 extern struct departure_layout departure_layout_oneline;
-/* extern struct departure_layout departure_layout_twoline; */
+extern struct departure_layout departure_layout_twoline;

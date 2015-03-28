@@ -13,28 +13,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <pebble.h>
-#include "settings.h"
+#include "common.h"
+#include "route_color.h"
 
-// Default values / cache.
-static bool settings[] = {
-	false, // ignored
-	true,  // SETTING_VIBRATE
-	false, // SETTING_COMPACT_DEPARTURES
-};
-
-bool get_setting(int which) {
-	const int index = which - _SETTING_FIRST;
-	if (persist_exists(which))
-		settings[index] = persist_read_bool(which);
-	return settings[index];
+/**
+ * Updates a departure line after the underlying departure has changed.
+ */
+void departure_layout_update(struct DepartureLine *line) {
+	const char *route = text_layer_get_text(line->route);
+	struct route_color color = get_color_for_route(route);
+	text_layer_set_background_color(line->route, color.bg);
+	text_layer_set_text_color(line->route, color.fg);
 }
 
-void set_setting(int which, bool to) {
-	persist_write_bool(which, to);
-	settings[which - _SETTING_FIRST] = to;
-}
-
-void toggle_setting(int which) {
-	set_setting(which, !get_setting(which));
+/**
+ * Destroys a departure line.
+ */
+void departure_layout_destroy(struct DepartureLine *line) {
+	text_layer_destroy(line->time);
+	text_layer_destroy(line->destination);
+	text_layer_destroy(line->route);
+	layer_destroy(line->layer);
+	free(line);
 }

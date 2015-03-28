@@ -26,7 +26,7 @@ static struct DepartureLine* create(const struct Departure *d, GRect frame) {
 	// Allocate a departure.
 	struct DepartureLine *line = (struct DepartureLine*)malloc(sizeof(struct DepartureLine));
 	// Override any height.
-	frame.size.h = DEPARTURE_HEIGHT;
+	frame.size.h = 2 * DEPARTURE_HEIGHT;
 	line->layer = layer_create(frame);
 
 	// A departure is rendered as "route destination time".
@@ -39,12 +39,11 @@ static struct DepartureLine* create(const struct Departure *d, GRect frame) {
 	text_layer_set_text_color(line->route, color.fg);
 
 	// destination
-	line->destination = text_layer_create((GRect) { .origin = { 30, 0 }, .size = { 75, DEPARTURE_HEIGHT } });
-	text_layer_set_font(line->destination, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+	line->destination = text_layer_create((GRect) { .origin = { 30, 0 }, .size = { 112, DEPARTURE_HEIGHT } });
 	text_layer_set_text(line->destination, d->destination);
 
 	// time
-	line->time = text_layer_create((GRect) { .origin = { 107, 0 }, .size = { 37, DEPARTURE_HEIGHT } });
+	line->time = text_layer_create((GRect) { .origin = { 107, DEPARTURE_HEIGHT }, .size = { 37, DEPARTURE_HEIGHT } });
 	text_layer_set_text(line->time, d->time);
 
 	// Add to the frame.
@@ -55,8 +54,9 @@ static struct DepartureLine* create(const struct Departure *d, GRect frame) {
 	return line;
 }
 
-struct departure_layout departure_layout_oneline = {
-	.departure_height = DEPARTURE_HEIGHT,
+
+struct departure_layout departure_layout_twoline = {
+	.departure_height = 2 * DEPARTURE_HEIGHT,
 	.departure_line_create = create,
 	.departure_line_update = departure_layout_update,
 	.departure_line_destroy = departure_layout_destroy
