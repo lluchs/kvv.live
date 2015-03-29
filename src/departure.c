@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "locale_framework/localize.h"
 #include "departure.h"
 #include "settings.h"
 #include "departure_layout/layouts.h"
@@ -54,7 +55,7 @@ void departure_deserialize(DictionaryIterator *iter, struct Departure *departure
 
 	// Time string reformatting.
 	if (strcmp("0", departure->time) == 0)
-		strcpy(departure->time, "now");
+		strcpy(departure->time, _("now"));
 	if (!departure->realtime) {
 		size_t len = strlen(departure->time);
 		departure->time[len++] = '*';
