@@ -55,9 +55,20 @@ static struct DepartureLine* create(const struct Departure *d, GRect frame) {
 	return line;
 }
 
+static void update(struct DepartureLine *line) {
+	departure_layout_update(line);
+
+	// Hack: "sofort" does not fit.
+	const char *time = text_layer_get_text(line->time);
+	if (time[0] == 's')
+		text_layer_set_font(line->time, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+	else
+		text_layer_set_font(line->time, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD));
+}
+
 struct departure_layout departure_layout_oneline = {
 	.departure_height = DEPARTURE_HEIGHT,
 	.departure_line_create = create,
-	.departure_line_update = departure_layout_update,
+	.departure_line_update = update,
 	.departure_line_destroy = departure_layout_destroy
 };
