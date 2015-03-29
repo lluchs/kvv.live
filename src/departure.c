@@ -26,6 +26,9 @@ void departure_deserialize(DictionaryIterator *iter, struct Departure *departure
 	Tuple *route_tuple = dict_find(iter, DEPARTURE_KEY_ROUTE);
 	Tuple *destination_tuple = dict_find(iter, DEPARTURE_KEY_DESTINATION);
 	Tuple *time_tuple = dict_find(iter, DEPARTURE_KEY_TIME);
+	Tuple *realtime_tuple = dict_find(iter, DEPARTURE_KEY_REALTIME);
+	Tuple *lowfloor_tuple = dict_find(iter, DEPARTURE_KEY_LOWFLOOR);
+	Tuple *traction_tuple = dict_find(iter, DEPARTURE_KEY_TRACTION);
 
 	if (route_tuple) {
 		strncpy(departure->route, route_tuple->value->cstring, sizeof(departure->route));
@@ -38,6 +41,24 @@ void departure_deserialize(DictionaryIterator *iter, struct Departure *departure
 	if (time_tuple) {
 		strncpy(departure->time, time_tuple->value->cstring, sizeof(departure->time));
 		departure->time[sizeof(departure->time) - 1] = '\0';
+	}
+	if (realtime_tuple) {
+		departure->realtime = (bool)realtime_tuple->value->data[0];
+	}
+	if (lowfloor_tuple) {
+		departure->lowfloor = (bool)lowfloor_tuple->value->data[0];
+	}
+	if (traction_tuple) {
+		departure->traction = (uint8_t)traction_tuple->value->data[0];
+	}
+
+	// Time string reformatting.
+	if (strcmp("0", departure->time) == 0)
+		strcpy(departure->time, "now");
+	if (!departure->realtime) {
+		size_t len = strlen(departure->time);
+		departure->time[len++] = '*';
+		departure->time[len++] = '\0';
 	}
 }
 

@@ -12,7 +12,10 @@
     "route": 7,
     "destination": 8,
     "time": 9,
-    "distance": 10
+    "realtime": 10,
+    "lowfloor": 11,
+    "traction": 12,
+    "distance": 13
   },
   "longName": "kvv.live",
   "versionCode": 1,

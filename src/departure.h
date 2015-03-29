@@ -25,6 +25,9 @@ struct Departure {
 	char route[4];
 	char destination[20];
 	char time[10];
+	bool realtime;
+	bool lowfloor;
+	uint8_t traction;
 };
 
 struct DepartureLine {

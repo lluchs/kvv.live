@@ -122,13 +122,11 @@ function transformDeparture(departure, i) {
     index: i,
     route: departure.route,
     destination: transformStopName(departure.destination),
-    time: (function(time) {
-      if (time === '0')
-        time = 'now';
-      if (!departure.realtime)
-        time += '*';
-      return time;
-    })(departure.time),
+    time: departure.time,
+    // Send these as single bytes by wrapping in an array.
+    realtime: [+departure.realtime],
+    lowfloor: [+departure.lowfloor],
+    traction: [+departure.traction],
   };
 }
 
