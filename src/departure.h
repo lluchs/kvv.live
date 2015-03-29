@@ -30,11 +30,16 @@ struct Departure {
 	uint8_t traction;
 };
 
+#define MAX_TRAMS 3
+
 struct DepartureLine {
+	const struct Departure *departure;
 	Layer *layer;
 	TextLayer *route;
 	TextLayer *destination;
 	TextLayer *time;
+	BitmapLayer *trams[MAX_TRAMS];
+	BitmapLayer *wheelchair;
 };
 
 void departure_deserialize(DictionaryIterator *iter, struct Departure *departure);
