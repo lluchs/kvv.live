@@ -25,6 +25,7 @@
 #include "stops.h"
 #include "network.h"
 #include "settings_window.h"
+#include "settings.h"
 
 static Window *window;
 static MenuLayer *menu;
@@ -33,7 +34,7 @@ static struct stops const *proximity_stops;
 static struct stops *favorite_stops;
 
 static sds proximity_status;
-static bool proximity_loading;
+static int proximity_loading;
 
 static void init_menu_layer();
 
@@ -64,7 +65,7 @@ static void request_proxmity_stops() {
 		menu_layer_reload_data(menu);
 		return;
 	}
-	proximity_loading = true;
+	proximity_loading = time(NULL);
 	proximity_status = sdscpy(proximity_status, _("Loading..."));
 	// Clear existing stops to prevent invalid menu entries.
 	stops_set_proximity_num(0);
@@ -107,13 +108,22 @@ void stops_window_reload_favorite_stops() {
 	menu_layer_reload_data(menu);
 }
 
+// Notify the user that proximity loading is done.
+static void proximity_loading_done() {
+	light_enable_interaction();
+	if (get_setting(SETTING_VIBRATE) && proximity_loading && time(NULL) - proximity_loading > 2)
+	  vibes_short_pulse();
+	proximity_loading = 0;
+}
+
 void stops_window_reload_proximity_stops() {
 	static char time[10];
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "reload_proximity_stops");
 	clock_copy_time_string(time, 10);
 	proximity_status = sdscpy(proximity_status, _("Updated at "));
 	proximity_status = sdscatlen(proximity_status, time, 10);
-	proximity_loading = false;
+	proximity_loading_done();
+
 	// The proximity stops are implicitly updated...
 	menu_layer_reload_data(menu);
 }
@@ -123,7 +133,7 @@ void show_proximity_error(char *error) {
 	// False alarm if we're not loading anything.
 	if (!proximity_loading) return;
 	proximity_status = sdscpy(proximity_status, error);
-	proximity_loading = false;
+	proximity_loading_done();
 	menu_layer_reload_data(menu);
 }
 
