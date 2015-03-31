@@ -15,6 +15,7 @@
 
 #include <pebble.h>
 #include "settings.h"
+#include "locale_framework/localize.h"
 
 // Default values / cache.
 static bool settings[] = {
@@ -37,4 +38,12 @@ void set_setting(int which, bool to) {
 
 void toggle_setting(int which) {
 	set_setting(which, !get_setting(which));
+}
+
+const char * get_setting_name(int which) {
+	switch (which) {
+		case SETTING_VIBRATE: return _("Vibration");
+		case SETTING_COMPACT_DEPARTURES: return _("Single line");
+	}
+	return NULL;
 }

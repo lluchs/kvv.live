@@ -22,11 +22,6 @@ static bool initialized = false;
 static Window *window;
 static MenuLayer *menu;
 
-static const char* settings[] = {
-	"Vibration",
-	"Single line",
-};
-
 static void init_menu_layer();
 
 static void window_load(Window *window) {
@@ -102,10 +97,11 @@ static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, ui
 // This is the menu item draw callback where you specify what each item should look like
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
 	char *state;
+	int which = _SETTING_FIRST + cell_index->row + 1;
 	switch (cell_index->section) {
 		case 0:
-			state = get_setting(_SETTING_FIRST + cell_index->row + 1) ? _("Enabled") : _("Disabled");
-			menu_cell_basic_draw(ctx, cell_layer, settings[cell_index->row], state, NULL);
+			state = get_setting(which) ? _("Enabled") : _("Disabled");
+			menu_cell_basic_draw(ctx, cell_layer, get_setting_name(which), state, NULL);
 			break;
 	}
 }
