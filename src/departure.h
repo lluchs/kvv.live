@@ -20,6 +20,7 @@
 #include <pebble.h>
 
 #include "network.h"
+#include "kerning_text_layer.h"
 
 struct Departure {
 	char route[4];
@@ -37,7 +38,7 @@ struct DepartureLine {
 	Layer *layer;
 	TextLayer *route;
 	TextLayer *destination;
-	TextLayer *time;
+	KerningTextLayer *time;
 	BitmapLayer *trams[MAX_TRAMS];
 	BitmapLayer *wheelchair;
 };

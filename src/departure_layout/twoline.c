@@ -16,6 +16,7 @@
 #include "layouts.h"
 #include "route_color.h"
 #include "common.h"
+#include "kerning_text_layer.h"
 
 #define DEPARTURE_HEIGHT 19
 
@@ -54,8 +55,8 @@ static struct DepartureLine* create(const struct Departure *d, GRect frame) {
 	text_layer_set_text(line->destination, d->destination);
 
 	// time
-	line->time = text_layer_create((GRect) { .origin = { 107, DEPARTURE_HEIGHT }, .size = { 37, DEPARTURE_HEIGHT } });
-	text_layer_set_text(line->time, d->time);
+	line->time = kerning_text_layer_create((GRect) { .origin = { 107, DEPARTURE_HEIGHT }, .size = { 37 + 5, DEPARTURE_HEIGHT } });
+	kerning_text_layer_set_text(line->time, d->time);
 
 	// trams
 	const int tram_wdt = 39;
@@ -70,7 +71,7 @@ static struct DepartureLine* create(const struct Departure *d, GRect frame) {
 	// Add to the frame.
 	layer_add_child(line->layer, text_layer_get_layer(line->route));
 	layer_add_child(line->layer, text_layer_get_layer(line->destination));
-	layer_add_child(line->layer, text_layer_get_layer(line->time));
+	layer_add_child(line->layer, kerning_text_layer_get_layer(line->time));
 
 	return line;
 }

@@ -20,17 +20,25 @@
  * Updates a departure line after the underlying departure has changed.
  */
 void departure_layout_update(struct DepartureLine *line) {
-	const char *route = text_layer_get_text(line->route);
+	const char *route = line->departure->route;
 	struct route_color color = get_color_for_route(route);
 	text_layer_set_background_color(line->route, color.bg);
 	text_layer_set_text_color(line->route, color.fg);
+
+	// Hack: "sofort" does not fit.
+	const char *time = line->departure->time;
+	static int sofort_kerning[] = { 0, -1, -1, -1, -1, -1, -2 };
+	if (time[0] == 's')
+		kerning_text_layer_set_kerning(line->time, sofort_kerning);
+	else
+		kerning_text_layer_set_kerning(line->time, NULL);
 }
 
 /**
  * Destroys a departure line.
  */
 void departure_layout_destroy(struct DepartureLine *line) {
-	text_layer_destroy(line->time);
+	kerning_text_layer_destroy(line->time);
 	text_layer_destroy(line->destination);
 	text_layer_destroy(line->route);
 	layer_destroy(line->layer);
