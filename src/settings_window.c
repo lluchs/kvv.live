@@ -22,11 +22,22 @@ static bool initialized = false;
 static Window *window;
 static MenuLayer *menu;
 
+#ifdef PBL_SDK_3
+static StatusBarLayer *status_bar;
+#endif
+
 static void init_menu_layer();
 
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
+
+#ifdef PBL_SDK_3
+	status_bar = status_bar_layer_create();
+	layer_add_child(window_layer, status_bar_layer_get_layer(status_bar));
+	bounds.origin.y += STATUS_BAR_LAYER_HEIGHT;
+	bounds.size.h -= STATUS_BAR_LAYER_HEIGHT;
+#endif
 
 	menu = menu_layer_create(bounds);
 	init_menu_layer();
