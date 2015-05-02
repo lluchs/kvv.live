@@ -26,13 +26,10 @@
 #include "network.h"
 #include "settings_window.h"
 #include "settings.h"
+#include "status_bar.h"
 
 static Window *window;
 static MenuLayer *menu;
-
-#ifdef PBL_SDK_3
-static StatusBarLayer *status_bar;
-#endif
 
 static struct stops const *proximity_stops;
 static struct stops *favorite_stops;
@@ -45,18 +42,17 @@ static void init_menu_layer();
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
-
-#ifdef PBL_SDK_3
-	status_bar = status_bar_layer_create();
-	layer_add_child(window_layer, status_bar_layer_get_layer(status_bar));
-	bounds.origin.y += STATUS_BAR_LAYER_HEIGHT;
-	bounds.size.h -= STATUS_BAR_LAYER_HEIGHT;
-#endif
+	status_bar_adjust_window_bounds(&bounds);
 
 	menu = menu_layer_create(bounds);
 	init_menu_layer();
 
 	layer_add_child(window_layer, menu_layer_get_layer(menu));
+}
+
+static void window_appear(Window *window) {
+	Layer *window_layer = window_get_root_layer(window);
+	layer_add_child(window_layer, status_bar_layer());
 }
 
 static void window_unload(Window *window) {
@@ -98,6 +94,7 @@ void stops_window_init() {
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) {
 		.load = window_load,
+		.appear = window_appear,
 		.unload = window_unload,
 	});
 	const bool animated = true;

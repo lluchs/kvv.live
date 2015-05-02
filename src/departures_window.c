@@ -20,13 +20,10 @@
 #include "departures_window.h"
 #include "departure.h"
 #include "settings.h"
+#include "status_bar.h"
 
 static Window *window;
 static ScrollLayer *scroll_layer;
-
-#ifdef PBL_SDK_3
-static StatusBarLayer *status_bar;
-#endif
 
 static char stopId[20];
 static time_t request_time;
@@ -69,14 +66,7 @@ static void click_config_provider(void *context) {
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
-
-	Layer *status_bar_layer = NULL;
-#ifdef PBL_SDK_3
-	status_bar = status_bar_layer_create();
-	status_bar_layer = status_bar_layer_get_layer(status_bar);
-	bounds.origin.y += STATUS_BAR_LAYER_HEIGHT;
-	bounds.size.h -= STATUS_BAR_LAYER_HEIGHT;
-#endif
+	status_bar_adjust_window_bounds(&bounds);
 
 	scroll_layer = scroll_layer_create((GRect) { .origin = { bounds.origin.x, bounds.origin.y + 23 },
 	                                             .size   = { bounds.size.w, bounds.size.h - 23 } });
@@ -89,7 +79,7 @@ static void window_load(Window *window) {
 	text_layer_set_font(title_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 	layer_add_child(window_layer, text_layer_get_layer(title_layer));
 
-	if (status_bar_layer) layer_add_child(window_layer, status_bar_layer);
+	layer_add_child(window_layer, status_bar_layer());
 
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "window_load");
 }
