@@ -83,6 +83,7 @@ static void window_load(Window *window) {
 	                                             .size   = { bounds.size.w, bounds.size.h - 23 } });
 	scroll_layer_set_click_config_onto_window(scroll_layer, window);
 	scroll_layer_set_callbacks(scroll_layer, (ScrollLayerCallbacks) { .click_config_provider = click_config_provider });
+	IFCOLOR(scroll_layer_set_shadow_hidden(scroll_layer, true));
 	layer_add_child(window_layer, scroll_layer_get_layer(scroll_layer));
 
 	title_layer = text_layer_create((GRect) { .origin = { bounds.origin.x + 3, bounds.origin.y - 1 },
