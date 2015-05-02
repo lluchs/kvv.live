@@ -27,6 +27,7 @@
 #include "settings_window.h"
 #include "settings.h"
 #include "status_bar.h"
+#include "color.h"
 
 static Window *window;
 static MenuLayer *menu;
@@ -247,4 +248,5 @@ static void init_menu_layer() {
 	menu_layer_set_click_config_onto_window(menu, window);
 	// Select the first favorite station.
 	menu_layer_set_selected_index(menu, (MenuIndex){.section = 1, .row = 0}, MenuRowAlignNone, false);
+	IFCOLOR(menu_layer_set_highlight_colors(menu, COLOR_KVV, GColorWhite));
 }

@@ -18,6 +18,7 @@
 #include "settings_window.h"
 #include "settings.h"
 #include "status_bar.h"
+#include "color.h"
 
 static bool initialized = false;
 static Window *window;
@@ -130,4 +131,5 @@ static void init_menu_layer() {
 		.select_click = menu_select_callback,
 	});
 	menu_layer_set_click_config_onto_window(menu, window);
+	IFCOLOR(menu_layer_set_highlight_colors(menu, COLOR_KVV, GColorWhite));
 }

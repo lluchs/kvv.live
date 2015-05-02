@@ -21,6 +21,7 @@
 #include "departure.h"
 #include "settings.h"
 #include "status_bar.h"
+#include "color.h"
 
 static Window *window;
 static ScrollLayer *scroll_layer;
@@ -36,7 +37,11 @@ static TextLayer *title_layer;
 static struct DepartureLine *lines[DEPARTURE_LINES];
 static struct Departure departures[DEPARTURE_LINES];
 
+#ifdef PBL_COLOR
+#define LINES_OFFSET_Y 1
+#else
 #define LINES_OFFSET_Y 0
+#endif
 
 /**
  * Request departures of the current stop.
@@ -63,6 +68,12 @@ static void click_config_provider(void *context) {
 	window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
 
+// Draws a white background for the scroll layer, overriding the red window.
+static void draw_scroll_layer_bg(Layer *layer, GContext *ctx) {
+	graphics_context_set_fill_color(ctx, GColorWhite);
+	graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornerNone);
+}
+
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
@@ -80,6 +91,12 @@ static void window_load(Window *window) {
 	layer_add_child(window_layer, text_layer_get_layer(title_layer));
 
 	layer_add_child(window_layer, status_bar_layer());
+
+	// Coloring
+	IFCOLOR(text_layer_set_background_color(title_layer, COLOR_KVV));
+	IFCOLOR(text_layer_set_text_color(title_layer, GColorWhite));
+	IFCOLOR(window_set_background_color(window, COLOR_KVV));
+	IFCOLOR(layer_set_update_proc(scroll_layer_get_layer(scroll_layer), draw_scroll_layer_bg));
 
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "window_load");
 }

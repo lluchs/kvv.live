@@ -13,30 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "status_bar.h"
-#include "color.h"
+#include <pebble.h>
 
-static Layer *status_bar = NULL;
+#ifdef PBL_COLOR
+#define IFCOLOR(x) x
 
-static void init_status_bar() {
-#ifdef PBL_SDK_3
-	StatusBarLayer *bar = status_bar_layer_create();
-	IFCOLOR(status_bar_layer_set_colors(bar, COLOR_KVV, GColorWhite));
-	status_bar = status_bar_layer_get_layer(bar);
+#define COLOR_KVV GColorFromHEX(0x900d2d)
+
 #else
-	GRect r;
-	status_bar = layer_create(r);
+#define IFCOLOR(x)
 #endif
-}
-
-Layer* status_bar_layer() {
-	if (!status_bar) init_status_bar();
-	return status_bar;
-}
-
-void status_bar_adjust_window_bounds(GRect *bounds) {
-#ifdef PBL_SDK_3
-	bounds->origin.y += STATUS_BAR_LAYER_HEIGHT;
-	bounds->size.h -= STATUS_BAR_LAYER_HEIGHT;
-#endif
-}
