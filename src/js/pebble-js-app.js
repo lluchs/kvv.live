@@ -16,7 +16,7 @@ Pebble.addEventListener('ready', function(e) {
 // Called when the user wants to configure the app.
 Pebble.addEventListener('showConfiguration', function(e) {
   console.log("Opening configuration", localStorage['config']);
-  Pebble.openURL('http://kvv-live.lwrl.de/#' + localStorage['config']);
+  Pebble.openURL('https://kvv-live.lwrl.de/#' + localStorage['config']);
 });
 
 // Called when the user is done configuring the app.
@@ -61,7 +61,7 @@ function proximitySearch() {
   };
 
   function locationSuccess(pos) {
-    getJSON(apiUrl('http://live.kvv.de/webapp/stops/bylatlon/' + pos.coords.latitude + '/' + pos.coords.longitude), function(result) {
+    getJSON(apiUrl('https://live.kvv.de/webapp/stops/bylatlon/' + pos.coords.latitude + '/' + pos.coords.longitude), function(result) {
       sendMessage(extend(type('proximity'), {length: result.stops.length}), messageHandler('proximity length success'));
       stopPreviousTransfer.proximity = sendMessages(result.stops.map(transformStop(type('proximity'))), function() {
         console.log('Sent ' + result.stops.length + ' stops.');
@@ -192,7 +192,7 @@ function messageHandler(msg) {
 
 /* Requests departures from the API. */
 function getDepartures(stopId, then) {
-  getJSON(apiUrl('http://live.kvv.de/webapp/departures/bystop/'+stopId+'?maxInfos=10'), then, function(res) {
+  getJSON(apiUrl('https://live.kvv.de/webapp/departures/bystop/'+stopId+'?maxInfos=10'), then, function(res) {
     var message;
     if (res.status == 400) {
       message = 'No info available.';
