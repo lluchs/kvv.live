@@ -58,6 +58,7 @@ static struct DepartureLine* create(const struct Departure *d, GRect frame) {
 	line->time = kerning_text_layer_create((GRect) { .origin = { 107, DEPARTURE_HEIGHT }, .size = { 37 + 5, DEPARTURE_HEIGHT } });
 	kerning_text_layer_set_text(line->time, d->time);
 
+#ifndef PBL_PLATFORM_APLITE
 	// trams
 	const int tram_wdt = 39;
 	const int pos[] = { 0, 1, -1 }; // third tram off screen
@@ -67,6 +68,7 @@ static struct DepartureLine* create(const struct Departure *d, GRect frame) {
 	}
 	line->wheelchair = bitmap_layer_create((GRect) { .origin = { 90, DEPARTURE_HEIGHT }, .size = { 16, 16 } });
 	layer_add_child(line->layer, bitmap_layer_get_layer(line->wheelchair));
+#endif
 
 	// Add to the frame.
 	layer_add_child(line->layer, text_layer_get_layer(line->route));
@@ -79,6 +81,7 @@ static struct DepartureLine* create(const struct Departure *d, GRect frame) {
 static void update(struct DepartureLine *line) {
 	departure_layout_update(line);
 
+#ifndef PBL_PLATFORM_APLITE
 	load_bitmaps();
 
 	// traction = 0, 2, 3
@@ -93,13 +96,16 @@ static void update(struct DepartureLine *line) {
 		bitmap_layer_set_bitmap(line->wheelchair, wheelchair);
 	else
 		bitmap_layer_set_bitmap(line->wheelchair, NULL);
+#endif
 }
 
 static void destroy(struct DepartureLine *line) {
+#ifndef PBL_PLATFORM_APLITE
 	for (size_t i = 0; i < MAX_TRAMS; i++) {
 		bitmap_layer_destroy(line->trams[i]);
 	}
 	bitmap_layer_destroy(line->wheelchair);
+#endif
 	departure_layout_destroy(line);
 }
 

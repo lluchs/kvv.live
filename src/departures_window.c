@@ -33,7 +33,13 @@ static time_t request_time;
 static char title[TITLE_LENGTH];
 static TextLayer *title_layer;
 
+#ifdef PBL_PLATFORM_APLITE
+// Unfortunately, aplite doesn't have enough RAM with PebbleOS 4 for 10 lines.
+// Additionally, the tram and wheelchair graphics are disabled in twoline.c
+#define DEPARTURE_LINES 9
+#else
 #define DEPARTURE_LINES 10
+#endif
 static struct DepartureLine *lines[DEPARTURE_LINES];
 static struct Departure departures[DEPARTURE_LINES];
 
@@ -179,7 +185,7 @@ void departures_window_receive_departure(DictionaryIterator *iter) {
 
 	// Make sure that the line does actually exist.
 	// It might not if the user is switching stops very fast.
-	if (lines[index]) {
+	if (index < DEPARTURE_LINES && lines[index]) {
 		departure_deserialize(iter, &departures[index]);
 		departure_line_update(lines[index]);
 		// Initiate a redraw of the given departure.
