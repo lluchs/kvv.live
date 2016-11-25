@@ -50,6 +50,9 @@ struct route_color get_color_for_route(const char *route) {
 			  case '9': color.bg = GColorMelon;
 						color.fg = GColorBlack; break;
 			  case '6': color.bg = GColorOxfordBlue; break;
+			  case '7': color.bg = GColorIcterine;
+						color.fg = GColorBlack; break;
+			  case '8': color.bg = GColorArmyGreen; break;
 		  }
 	}
 	return color;
