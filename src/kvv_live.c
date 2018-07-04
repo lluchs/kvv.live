@@ -77,6 +77,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 		switch (type) {
 			case MSG_TYPE_PROXIMITY:
 				show_proximity_error(tuple->value->cstring);
+				break;
 			default:
 				APP_LOG(APP_LOG_LEVEL_ERROR, "Invalid error type %d", type);
 		}
