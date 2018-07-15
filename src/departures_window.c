@@ -26,7 +26,7 @@
 static Window *window;
 static ScrollLayer *scroll_layer;
 
-static char stopId[20], stopDir[20];
+static char stopId[30], stopDir[30];
 static time_t request_time;
 
 #define TITLE_LENGTH 30
@@ -212,7 +212,9 @@ void departures_window_init() {
 
 void departures_window_show(char *nextStopId, char *nextStopDir) {
 	strncpy(stopId, nextStopId, sizeof(stopId));
+	stopId[sizeof(stopId)-1] = '\0';
 	strncpy(stopDir, nextStopDir, sizeof(stopDir));
+	stopDir[sizeof(stopDir)-1] = '\0';
 	
 	// Reset previous departures.
 	memset(departures, 0, DEPARTURE_LINES * sizeof(struct Departure));

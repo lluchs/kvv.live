@@ -36,7 +36,7 @@ Pebble.addEventListener('appmessage', function(e) {
     console.log('Received stopName ' + e.payload.stopName);
     lastStopId = e.payload.stopName;
     stopPreviousTransfer.departures();
-    getDepartures(e.payload.stopName, e.payload.stopDir, function(result) {
+    getDepartures(untransformStopName(e.payload.stopName), untransformStopName(e.payload.stopDir), function(result) {
       // Make sure that there wasn't a second request while we were waiting for
       // an answer.
       if (lastStopId == e.payload.stopName)
@@ -59,8 +59,17 @@ function proximitySearch() {
   };
 
   function locationSuccess(pos) {
-    getJSON(apiUrl('https://live.kvv.de/webapp/stops/bylatlon/' + pos.coords.latitude + '/' + pos.coords.longitude), function(result) {
+    getJSONForm('https://online.fahrplan.zvv.ch/bin/query.exe/dny', {
+      tpl: 'stop2json',
+      performLocating: 2,
+      look_maxno: 10,
+      look_maxdist: 1000,
+      look_x: Math.floor(pos.coords.longitude  * 1000000),
+      look_y: Math.floor(pos.coords.latitude   * 1000000),
+      look_nv: 'nur_hauptmast|yes|del_doppelt|yes',
+    }, function(result) {
       sendMessage(extend(type('proximity'), {length: result.stops.length}), messageHandler('proximity length success'));
+      console.log(JSON.stringify(result.stops.map(transformStop(type('proximity')))));
       stopPreviousTransfer.proximity = sendMessages(result.stops.map(transformStop(type('proximity'))), function() {
         console.log('Sent ' + result.stops.length + ' stops.');
         sendMessage(action('reload_proximity_stops'), messageHandler('sent reload proximity action'));
@@ -72,6 +81,11 @@ function proximitySearch() {
 
   function locationError(err) {
     console.log('location error (' + err.code + '): ' + err.message);
+    if (err.code == 3) {
+      // timeout, retry
+      console.log('retry');
+      proximitySearch();
+    }
   }
 
   // Request current position
@@ -94,8 +108,8 @@ function transformStop(params) {
   return function(stop, i) {
     // Include the distance when available.
     var dist = {};
-    if (stop.distance)
-      dist.distance = stop.distance;
+    if (stop.dist)
+      dist.distance = +stop.dist;
     return extend({
       index: i,
       stopName: transformStopName(stop.name),
@@ -137,6 +151,10 @@ function transformStopName(name) {
   return name.replace(/&#(\d+);/g, function(match, dec) {
     return String.fromCharCode(dec);
   }).replace('Zürich', 'ZH');
+}
+
+function untransformStopName(name) {
+  return name.replace('ZH', 'Zürich');
 }
 
 /*

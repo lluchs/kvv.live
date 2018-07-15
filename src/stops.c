@@ -132,7 +132,8 @@ void add_proximity_stop(int i, sds name, int distance) {
 void stops_receive_stop(DictionaryIterator *iter) {
 	int index = dict_find(iter, MSG_KEY_INDEX)->value->int32;
 	sds name = sdsnew(dict_find(iter, MSG_KEY_STOPNAME)->value->cstring);
-	sds dir = sdsnew(dict_find(iter, MSG_KEY_STOPDIR)->value->cstring);
+	Tuple *dir_tuple = dict_find(iter, MSG_KEY_STOPDIR);
+	sds dir = sdsnew(dir_tuple ? dir_tuple->value->cstring : "");
 	int distance;
 
 	int type = dict_find(iter, MSG_KEY_TYPE)->value->int32;
