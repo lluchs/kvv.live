@@ -34,13 +34,16 @@ var lastStopId;
 Pebble.addEventListener('appmessage', function(e) {
   if ('stopName' in e.payload) {
     console.log('Received stopName ' + e.payload.stopName);
-    lastStopId = e.payload.stopName;
+    lastStopId = e.payload.stopName + e.payload.stopDir;
     stopPreviousTransfer.departures();
     getDepartures(untransformStopName(e.payload.stopName), untransformStopName(e.payload.stopDir), function(result) {
       // Make sure that there wasn't a second request while we were waiting for
       // an answer.
-      if (lastStopId == e.payload.stopName)
-        transferDepartures(result.station.name, result.connections);
+      if (lastStopId == e.payload.stopName + e.payload.stopDir) {
+        var name = result.station.name;
+        if (name == '') name = 'Error: not found';
+        transferDepartures(name, result.connections);
+      }
     });
   } else if (e.payload.action == action('reload_proximity_stops').action) {
     console.log('Doing proximity search...');
@@ -229,8 +232,10 @@ function getDepartures(stopName, stopDir, then) {
       message = 'Error: HTTP ' + res.status;
     }
     then({
-      stopName: message,
-      departures: [],
+      station: {
+        name: message,
+      },
+      connections: [],
     });
   });
 }
