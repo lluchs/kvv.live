@@ -20,18 +20,18 @@
 static struct stops proximity_stops;
 
 /* Adds the given stop to the persistant memory. */
-static void add_favorite_stop(int i, char *name, char *id) {
+static void add_favorite_stop(int i, char *name, char *dir) {
 	int key = PERSIST_STOPS_START + i * 2;
 	persist_write_string(key, name);
-	persist_write_string(key + 1, id);
+	persist_write_string(key + 1, dir);
 }
 
 static void create_default_stops() {
 	stops_set_favorites_num(4);
-	add_favorite_stop(0, "Oerlikon", "Oerlikon");
-	add_favorite_stop(1, "Hardbrücke", "Hardbrücke");
-	add_favorite_stop(2, "Bad Allenmoos", "Bad Allenmoos");
-	add_favorite_stop(3, "Zürich HB", "Zürich HB");
+	add_favorite_stop(0, "Oerlikon", "Hardbrücke");
+	add_favorite_stop(1, "Hardbrücke", "");
+	add_favorite_stop(2, "Bad Allenmoos", "");
+	add_favorite_stop(3, "Zürich HB", "");
 }
 
 /* Returns the stops requested from proximity search. */
@@ -52,7 +52,7 @@ struct stops* read_favorite_stops() {
 
 	// Allocate arrays.
 	stops->names = (sds*)malloc(stops->num * sizeof(sds));
-	stops->ids = (sds*)malloc(stops->num * sizeof(sds));
+	stops->dirs = (sds*)malloc(stops->num * sizeof(sds));
 
 	for (unsigned int i = 0, key; i < stops->num; i++) {
 		key = PERSIST_STOPS_START + i * 2;
@@ -61,14 +61,14 @@ struct stops* read_favorite_stops() {
 			APP_LOG(APP_LOG_LEVEL_ERROR, "Missing stop entry in persistant memory.");
 			// Initialize to empty strings and hope that nothing breaks...
 			stops->names[i] = sdsnew("");
-			stops->ids[i] = sdsnew("");
+			stops->dirs[i] = sdsnew("");
 		}
 		// Name
 		persist_read_string(key, buffer, 30);
 		stops->names[i] = sdsnew(buffer);
-		// id
+		// Direction
 		persist_read_string(key + 1, buffer, 30);
-		stops->ids[i] = sdsnew(buffer);
+		stops->dirs[i] = sdsnew(buffer);
 	}
 
 	return stops;
@@ -77,12 +77,12 @@ struct stops* read_favorite_stops() {
 static void stops_clear(struct stops *stops) {
 	for (unsigned int i = 0; i < stops->num; i++) {
 		sdsfree(stops->names[i]);
-		sdsfree(stops->ids[i]);
+		sdsfree(stops->dirs[i]);
 	}
 	free(stops->names);
 	stops->names = NULL;
-	free(stops->ids);
-	stops->ids = NULL;
+	free(stops->dirs);
+	stops->dirs = NULL;
 	if (stops->distances) {
 		free(stops->distances);
 		stops->distances = NULL;
@@ -117,14 +117,14 @@ void stops_set_proximity_num(int num) {
 	if (num > 0) {
 		// Allocate arrays.
 		proximity_stops.names = (sds*)malloc(num * sizeof(sds));
-		proximity_stops.ids = (sds*)malloc(num * sizeof(sds));
+		proximity_stops.dirs = (sds*)malloc(num * sizeof(sds));
 		proximity_stops.distances = (int*)malloc(num * sizeof(int));
 	}
 }
 
-void add_proximity_stop(int i, sds name, sds id, int distance) {
+void add_proximity_stop(int i, sds name, int distance) {
 	proximity_stops.names[i] = sdsdup(name);
-	proximity_stops.ids[i] = sdsdup(id);
+	proximity_stops.dirs[i] = sdsnew("");
 	proximity_stops.distances[i] = distance;
 }
 
@@ -132,22 +132,22 @@ void add_proximity_stop(int i, sds name, sds id, int distance) {
 void stops_receive_stop(DictionaryIterator *iter) {
 	int index = dict_find(iter, MSG_KEY_INDEX)->value->int32;
 	sds name = sdsnew(dict_find(iter, MSG_KEY_STOPNAME)->value->cstring);
-	sds id = sdsnew(dict_find(iter, MSG_KEY_STOPID)->value->cstring);
+	sds dir = sdsnew(dict_find(iter, MSG_KEY_STOPDIR)->value->cstring);
 	int distance;
 
 	int type = dict_find(iter, MSG_KEY_TYPE)->value->int32;
 	switch (type) {
 		case MSG_TYPE_FAVORITES:
-			add_favorite_stop(index, name, id);
+			add_favorite_stop(index, name, dir);
 			break;
 		case MSG_TYPE_PROXIMITY:
 			distance = dict_find(iter, STOP_KEY_DISTANCE)->value->int32;
-			add_proximity_stop(index, name, id, distance);
+			add_proximity_stop(index, name, distance);
 			break;
 		default:
 			APP_LOG(APP_LOG_LEVEL_ERROR, "Invalid type %d", type);
 	}
 
 	sdsfree(name);
-	sdsfree(id);
+	sdsfree(dir);
 }

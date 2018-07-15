@@ -24,8 +24,8 @@ enum {
 
 struct stops {
 	unsigned int num;
-	sds *names;
-	sds *ids;
+	sds *names; // name of stop, also used as search input
+	sds *dirs;  // direction input, empty for all routes
 	// Only set for proximity search.
 	int *distances;
 };

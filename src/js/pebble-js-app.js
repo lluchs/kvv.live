@@ -32,14 +32,14 @@ Pebble.addEventListener('webviewclosed', function(e) {
 var lastStopId;
 // Called when receiving a message from Pebble.
 Pebble.addEventListener('appmessage', function(e) {
-  if ('stopId' in e.payload) {
-    console.log('Received stopId ' + e.payload.stopId);
-    lastStopId = e.payload.stopId;
+  if ('stopName' in e.payload) {
+    console.log('Received stopName ' + e.payload.stopName);
+    lastStopId = e.payload.stopName;
     stopPreviousTransfer.departures();
-    getDepartures(e.payload.stopId, function(result) {
+    getDepartures(e.payload.stopName, e.payload.stopDir, function(result) {
       // Make sure that there wasn't a second request while we were waiting for
       // an answer.
-      if (lastStopId == e.payload.stopId)
+      if (lastStopId == e.payload.stopName)
         transferDepartures(result.station.name, result.connections);
     });
   } else if (e.payload.action == action('reload_proximity_stops').action) {
@@ -99,7 +99,6 @@ function transformStop(params) {
     return extend({
       index: i,
       stopName: transformStopName(stop.name),
-      stopId: stop.id
     }, dist, params);
   }
 }
@@ -196,10 +195,11 @@ function messageHandler(msg) {
 }
 
 /* Requests departures from the API. */
-function getDepartures(stopName, then) {
+function getDepartures(stopName, stopDir, then) {
   getJSONForm('https://online.fahrplan.zvv.ch/bin/stboard.exe/dny', {
     maxJourneys: 10,
     input: stopName,
+    dirInput: stopDir,
     start: 1,
     tpl: 'stbResult2json',
   }, then, function(res) {

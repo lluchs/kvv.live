@@ -23,5 +23,5 @@ void departures_window_handle_error();
 
 // Initialization
 void departures_window_init();
-void departures_window_show(char *nextStopId);
+void departures_window_show(char *nextStopName, char *nextStopDir);
 void departures_window_deinit();

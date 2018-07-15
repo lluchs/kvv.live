@@ -26,7 +26,7 @@
 static Window *window;
 static ScrollLayer *scroll_layer;
 
-static char stopId[20];
+static char stopId[20], stopDir[20];
 static time_t request_time;
 
 #define TITLE_LENGTH 30
@@ -60,9 +60,12 @@ static void request_departures() {
 	app_message_outbox_begin(&iter);
 	// Indirection to avoid "is always true" warning due to the
 	// TupletCString macro.
-	char *id = stopId;
-	Tuplet value = TupletCString(MSG_KEY_STOPID, id);
-	dict_write_tuplet(iter, &value);
+	char *name = stopId;
+	Tuplet name_value = TupletCString(MSG_KEY_STOPNAME, name);
+	dict_write_tuplet(iter, &name_value);
+	char *dir = stopDir;
+	Tuplet dir_value = TupletCString(MSG_KEY_STOPDIR, dir);
+	dict_write_tuplet(iter, &dir_value);
 	app_message_outbox_send();
 }
 
@@ -207,8 +210,9 @@ void departures_window_init() {
 	});
 }
 
-void departures_window_show(char *nextStopId) {
-	strncpy(stopId, nextStopId, 20);
+void departures_window_show(char *nextStopId, char *nextStopDir) {
+	strncpy(stopId, nextStopId, sizeof(stopId));
+	strncpy(stopDir, nextStopDir, sizeof(stopDir));
 	
 	// Reset previous departures.
 	memset(departures, 0, DEPARTURE_LINES * sizeof(struct Departure));

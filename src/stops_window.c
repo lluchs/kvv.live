@@ -60,9 +60,9 @@ static void window_unload(Window *window) {
 	menu_layer_destroy(menu);
 }
 
-static void show_departures(char *stop_id) {
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "Showing departures for station %s.", stop_id);
-	departures_window_show(stop_id);
+static void show_departures(char *stop_name, char *stop_dir) {
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "Showing departures for station %s (via %s).", stop_name, stop_dir);
+	departures_window_show(stop_name, stop_dir);
 }
 
 /* Request stops from the phone. */
@@ -195,20 +195,31 @@ static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, ui
 
 // This is the menu item draw callback where you specify what each item should look like
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
-	static char dist_buf[10];
+	static char buf[30];
 	// Determine which section we're going to draw in
 	switch (cell_index->section) {
 		case 0: // proximity search
 			if (cell_index->row == 0) {
 				menu_cell_basic_draw(ctx, cell_layer, _("Search"), proximity_status, NULL);
 			} else {
-				snprintf(dist_buf, 10, "%dm", proximity_stops->distances[cell_index->row - 1]);
-				menu_cell_basic_draw(ctx, cell_layer, proximity_stops->names[cell_index->row - 1], dist_buf, NULL);
+				snprintf(buf, sizeof(buf), "%dm", proximity_stops->distances[cell_index->row - 1]);
+				menu_cell_basic_draw(ctx, cell_layer, proximity_stops->names[cell_index->row - 1], buf, NULL);
 			}
 			break;
 		case 1: // favorites
-			menu_cell_basic_draw(ctx, cell_layer, favorite_stops->names[cell_index->row], NULL, NULL);
+		{
+			char *title = favorite_stops->names[cell_index->row];
+			char *dir = favorite_stops->dirs[cell_index->row];
+			if (dir[0]) {
+				snprintf(buf, sizeof(buf), "%s -> %s", title, dir);
+				// Make sure we don't produce invalid UTF-8 at the end.
+				char *end = buf + sizeof(buf)-2;
+				while (*end & 0x80) *(end--) = '\0';
+				title = buf;
+			}
+			menu_cell_basic_draw(ctx, cell_layer, title, NULL, NULL);
 			break;
+		}
 		case 2: // settings
 			menu_cell_basic_draw(ctx, cell_layer, _("Settings"), NULL, NULL);
 			break;
@@ -223,10 +234,10 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
 			if (cell_index->row == 0)
 				request_proxmity_stops();
 			else
-				show_departures(proximity_stops->ids[cell_index->row - 1]);
+				show_departures(proximity_stops->names[cell_index->row - 1], "");
 			break;
 		case 1: // favorites
-			show_departures(favorite_stops->ids[cell_index->row]);
+			show_departures(favorite_stops->names[cell_index->row], favorite_stops->dirs[cell_index->row]);
 			break;
 		case 2: // settings
 			settings_window_init();
