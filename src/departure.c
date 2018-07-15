@@ -28,8 +28,9 @@ void departure_deserialize(DictionaryIterator *iter, struct Departure *departure
 	Tuple *destination_tuple = dict_find(iter, DEPARTURE_KEY_DESTINATION);
 	Tuple *time_tuple = dict_find(iter, DEPARTURE_KEY_TIME);
 	Tuple *realtime_tuple = dict_find(iter, DEPARTURE_KEY_REALTIME);
-	Tuple *lowfloor_tuple = dict_find(iter, DEPARTURE_KEY_LOWFLOOR);
-	Tuple *traction_tuple = dict_find(iter, DEPARTURE_KEY_TRACTION);
+	Tuple *platform_tuple = dict_find(iter, DEPARTURE_KEY_PLATFORM);
+	Tuple *color_fg_tuple = dict_find(iter, DEPARTURE_KEY_COLOR_FG);
+	Tuple *color_bg_tuple = dict_find(iter, DEPARTURE_KEY_COLOR_BG);
 
 	if (route_tuple) {
 		strncpy(departure->route, route_tuple->value->cstring, sizeof(departure->route));
@@ -46,11 +47,18 @@ void departure_deserialize(DictionaryIterator *iter, struct Departure *departure
 	if (realtime_tuple) {
 		departure->realtime = (bool)realtime_tuple->value->data[0];
 	}
-	if (lowfloor_tuple) {
-		departure->lowfloor = (bool)lowfloor_tuple->value->data[0];
+	if (platform_tuple && platform_tuple->value->cstring[0]) {
+		char *plt = _("Plt. ");
+		size_t len = strlen(plt);
+		strcpy(departure->platform, plt);
+		strncpy(departure->platform + len, platform_tuple->value->cstring, sizeof(departure->platform) - len);
+		departure->platform[sizeof(departure->platform) - 1] = '\0';
 	}
-	if (traction_tuple) {
-		departure->traction = (uint8_t)traction_tuple->value->data[0];
+	if (color_fg_tuple) {
+		departure->color_fg = color_fg_tuple->value->uint32;
+	}
+	if (color_bg_tuple) {
+		departure->color_bg = color_bg_tuple->value->uint32;
 	}
 
 	// Time string reformatting.

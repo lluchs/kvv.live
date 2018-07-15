@@ -1,6 +1,4 @@
-/* The JS app transfers departures from the kvv.live API to Pebble. */
-
-var API_KEY = '377d840e54b59adbe53608ba1aad70e8';
+/* The JS app transfers departures from the ZVV API to Pebble. */
 
 // These functions make sure that there's only one transfer at a time.
 var stopPreviousTransfer = {
@@ -35,14 +33,14 @@ var lastStopId;
 // Called when receiving a message from Pebble.
 Pebble.addEventListener('appmessage', function(e) {
   if ('stopId' in e.payload) {
-    console.log('Received stopId', e.payload.stopId);
+    console.log('Received stopId ' + e.payload.stopId);
     lastStopId = e.payload.stopId;
     stopPreviousTransfer.departures();
     getDepartures(e.payload.stopId, function(result) {
       // Make sure that there wasn't a second request while we were waiting for
       // an answer.
       if (lastStopId == e.payload.stopId)
-        transferDepartures(result.stopName, result.departures);
+        transferDepartures(result.station.name, result.connections);
     });
   } else if (e.payload.action == action('reload_proximity_stops').action) {
     console.log('Doing proximity search...');
@@ -118,21 +116,28 @@ function transferDepartures(stopName, departures) {
 
 /* Transforms the departure to a pebble message. */
 function transformDeparture(departure, i) {
+  var hasRealTime = departure.mainLocation.realTime.hasRealTime;
+  function switchRT(key) { return hasRealTime ? departure.mainLocation.realTime[key] : departure.mainLocation[key] }
+  var countdown = switchRT('countdown')
+  var route = departure.product.line ? departure.product.line : departure.product.name;
   return {
     index: i,
-    route: departure.route,
-    destination: transformStopName(departure.destination),
-    time: departure.time,
+    route: route.replace(/ /g, ''),
+    destination: transformStopName(departure.product.direction),
+    time: +countdown <= 9 ? countdown+' min' : switchRT('time'),
+    platform: switchRT('platform'),
+    colorFg: parseInt(departure.product.color.fg, 16),
+    colorBg: parseInt(departure.product.color.bg, 16),
     // Send these as single bytes by wrapping in an array.
-    realtime: [+departure.realtime],
-    lowfloor: [+departure.lowfloor],
-    traction: [+departure.traction],
+    realtime: [+hasRealTime],
   };
 }
 
 /* Transforms a stop name. */
 function transformStopName(name) {
-  return name.replace('Karlsruhe', 'KA');
+  return name.replace(/&#(\d+);/g, function(match, dec) {
+    return String.fromCharCode(dec);
+  }).replace('Zürich', 'ZH');
 }
 
 /*
@@ -191,8 +196,13 @@ function messageHandler(msg) {
 }
 
 /* Requests departures from the API. */
-function getDepartures(stopId, then) {
-  getJSON(apiUrl('https://live.kvv.de/webapp/departures/bystop/'+stopId+'?maxInfos=10'), then, function(res) {
+function getDepartures(stopName, then) {
+  getJSONForm('https://online.fahrplan.zvv.ch/bin/stboard.exe/dny', {
+    maxJourneys: 10,
+    input: stopName,
+    start: 1,
+    tpl: 'stbResult2json',
+  }, then, function(res) {
     var message;
     if (res.status == 400) {
       message = 'No info available.';
@@ -223,12 +233,26 @@ function getJSON(url, then, errthen) {
   req.send();
 }
 
-/* Adds the API key to an URL. */
-function apiUrl(url) {
-  if (url.indexOf('?') == -1)
-    return url + '?key=' + API_KEY;
-  else
-    return url + '&key=' + API_KEY;
+// Performs a HTTP GET request, parsing JSON.
+function getJSONForm(url, params, then, errthen) {
+  var query = '';
+  for (var key in params) {
+    query += key + '=' + encodeURIComponent(params[key]) + '&';
+  }
+  query = query.slice(0, -1);
+  var req = new XMLHttpRequest();
+  req.open('POST', url, true);
+  req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+  req.onload = function(e) {
+    if (req.readyState == 4 && req.status == 200) {
+      var response = JSON.parse(req.responseText);
+      then(response);
+    } else {
+      console.error('getJSON error', req.status);
+      if (errthen) errthen(req);
+    }
+  };
+  req.send(query);
 }
 
 /* Action encoding. */

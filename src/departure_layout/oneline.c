@@ -14,7 +14,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "layouts.h"
-#include "route_color.h"
 #include "common.h"
 
 #define DEPARTURE_HEIGHT 19
@@ -35,9 +34,6 @@ static struct DepartureLine* create(const struct Departure *d, GRect frame) {
 	line->route = text_layer_create((GRect) { .origin = { 3, 0 }, .size = { 25, DEPARTURE_HEIGHT } });
 	text_layer_set_text(line->route, d->route);
 	text_layer_set_text_alignment(line->route, GTextAlignmentCenter);
-	struct route_color color = get_color_for_route(d->route);
-	text_layer_set_background_color(line->route, color.bg);
-	text_layer_set_text_color(line->route, color.fg);
 
 	// destination
 	line->destination = text_layer_create((GRect) { .origin = { 30, 0 }, .size = { 75, DEPARTURE_HEIGHT } });

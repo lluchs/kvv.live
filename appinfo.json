@@ -1,6 +1,6 @@
 {
   "versionLabel": "2.4",
-  "uuid": "c7767843-ec00-4655-9f35-93c90347134d",
+  "uuid": "c7767843-ec00-4655-9f35-93c90347134e",
   "appKeys": {
     "length": 0,
     "index": 1,
@@ -13,17 +13,18 @@
     "destination": 8,
     "time": 9,
     "realtime": 10,
-    "lowfloor": 11,
-    "traction": 12,
-    "distance": 13
+    "platform": 11,
+    "colorFg": 12,
+    "colorBg": 13,
+    "distance": 14
   },
-  "longName": "kvv.live",
+  "longName": "zvv.live",
   "versionCode": 1,
   "capabilities": [
     "configurable",
     "location"
   ],
-  "shortName": "kvv.live",
+  "shortName": "zvv.live",
   "companyName": "Lukas Werling",
   "watchapp": {
     "watchface": false

@@ -27,12 +27,11 @@ static void add_favorite_stop(int i, char *name, char *id) {
 }
 
 static void create_default_stops() {
-	stops_set_favorites_num(5);
-	add_favorite_stop(0, "KA Hbf Vorplatz", "de:8212:89");
-	add_favorite_stop(1, "KA Durlacher Tor", "de:8212:3");
-	add_favorite_stop(2, "KA Marktplatz (Kaiserstr)", "de:8212:1");
-	add_favorite_stop(3, "KA ZKM", "de:8212:65");
-	add_favorite_stop(4, "KA Entenfang", "de:8212:51");
+	stops_set_favorites_num(4);
+	add_favorite_stop(0, "Oerlikon", "Oerlikon");
+	add_favorite_stop(1, "Hardbrücke", "Hardbrücke");
+	add_favorite_stop(2, "Bad Allenmoos", "Bad Allenmoos");
+	add_favorite_stop(3, "Zürich HB", "Zürich HB");
 }
 
 /* Returns the stops requested from proximity search. */
@@ -42,10 +41,10 @@ struct stops const * get_proximity_stops() {
 
 /* Reads stops from persistent memory. */
 struct stops* read_favorite_stops() {
-	if (!persist_read_int(PERSIST_STOPS_LENGTH)) {
+	//if (!persist_read_int(PERSIST_STOPS_LENGTH)) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "No stops found, creating default ones...");
 		create_default_stops();
-	}
+	//}
 
 	struct stops *stops = (struct stops*)malloc(sizeof(struct stops));
 	stops->num = persist_read_int(PERSIST_STOPS_LENGTH);

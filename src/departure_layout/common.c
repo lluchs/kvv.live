@@ -14,16 +14,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "common.h"
-#include "route_color.h"
 
 /**
  * Updates a departure line after the underlying departure has changed.
  */
 void departure_layout_update(struct DepartureLine *line) {
-	const char *route = line->departure->route;
-	struct route_color color = get_color_for_route(route);
-	text_layer_set_background_color(line->route, color.bg);
-	text_layer_set_text_color(line->route, color.fg);
+	text_layer_set_background_color(line->route, GColorFromHEX(line->departure->color_bg));
+	text_layer_set_text_color(line->route, GColorFromHEX(line->departure->color_fg));
 
 	// Hack: "sofort" does not fit.
 	const char *time = line->departure->time;
