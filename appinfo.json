@@ -32,22 +32,6 @@
   "resources": {
     "media": [
       {
-        "menuIcon": true,
-        "type": "png",
-        "name": "KVV_LOGO",
-        "file": "images/kvv_logo.png"
-      },
-      {
-        "type": "png",
-        "name": "TRAM",
-        "file": "images/tram.png"
-      },
-      {
-        "type": "png",
-        "name": "WHEELCHAIR",
-        "file": "images/wheelchair.png"
-      },
-      {
         "type": "raw",
         "name": "LOCALE_ENGLISH",
         "file": "locale_english.bin"
