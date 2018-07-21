@@ -1,0 +1,20 @@
+@head@\
+<link rel="stylesheet" href="@href">@\
+@middle@\
+<script src="@src"></script>@\
+@end
+@(name filename)
+@(bind dir @(sub (command-get-string `dirname "@filename"`) 0 -1))
+@(bind stylesheet @(file-get-string `@dir@href`))
+@(bind script @(file-get-string `@dir@src`))
+@(output)
+@head
+<style>
+@stylesheet
+</style>
+@middle
+<script>
+@script
+</script>
+@end
+@(end)

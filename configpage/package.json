@@ -1,0 +1,21 @@
+{
+  "name": "configpage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "GPL3",
+  "devDependencies": {
+    "babel-preset-react": "^6.24.1",
+    "parcel-bundler": "^1.9.6"
+  },
+  "dependencies": {
+    "freezer-js": "^0.14.0",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "slipjs": "^2.1.1"
+  }
+}

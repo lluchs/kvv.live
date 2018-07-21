@@ -1,0 +1,1 @@
+../../configpage/dist/configpage.js

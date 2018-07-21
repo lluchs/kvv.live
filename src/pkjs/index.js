@@ -1,5 +1,7 @@
 /* The JS app transfers departures from the ZVV API to Pebble. */
 
+var configpage = require('./configpage.js')
+
 // These functions make sure that there's only one transfer at a time.
 var stopPreviousTransfer = {
   proximity: noop,
@@ -13,8 +15,9 @@ Pebble.addEventListener('ready', function(e) {
 
 // Called when the user wants to configure the app.
 Pebble.addEventListener('showConfiguration', function(e) {
-  console.log("Opening configuration", localStorage['config']);
-  Pebble.openURL('https://kvv-live.lwrl.de/#' + localStorage['config']);
+  console.log("Opening configuration");
+  var page = atob(configpage).replace('@@INITIAL STATE@@', localStorage['config'])
+  Pebble.openURL('data:text/html;base64,' + encodeURIComponent(btoa(page)));
 });
 
 // Called when the user is done configuring the app.
@@ -116,6 +119,7 @@ function transformStop(params) {
     return extend({
       index: i,
       stopName: transformStopName(stop.name),
+      stopDir: transformStopName(stop.dir),
     }, dist, params);
   }
 }

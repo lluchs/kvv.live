@@ -41,10 +41,10 @@ struct stops const * get_proximity_stops() {
 
 /* Reads stops from persistent memory. */
 struct stops* read_favorite_stops() {
-	//if (!persist_read_int(PERSIST_STOPS_LENGTH)) {
+	if (!persist_read_int(PERSIST_STOPS_LENGTH)) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "No stops found, creating default ones...");
 		create_default_stops();
-	//}
+	}
 
 	struct stops *stops = (struct stops*)malloc(sizeof(struct stops));
 	stops->num = persist_read_int(PERSIST_STOPS_LENGTH);

@@ -74,5 +74,6 @@
     "basalt",
     "diorite"
   ],
+  "enableMultiJS": true,
   "sdkVersion": "3"
 }
