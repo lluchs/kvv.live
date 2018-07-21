@@ -18,7 +18,7 @@
 #ifdef PBL_COLOR
 #define IFCOLOR(x) x
 
-#define COLOR_KVV GColorFromHEX(0x900d2d)
+#define COLOR_KVV GColorFromHEX(0x0479cc)
 
 #else
 #define IFCOLOR(x)
