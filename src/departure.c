@@ -53,6 +53,8 @@ void departure_deserialize(DictionaryIterator *iter, struct Departure *departure
 		strcpy(departure->platform, plt);
 		strncpy(departure->platform + len, platform_tuple->value->cstring, sizeof(departure->platform) - len);
 		departure->platform[sizeof(departure->platform) - 1] = '\0';
+	} else {
+		departure->platform[0] = '\0';
 	}
 	if (color_fg_tuple) {
 		departure->color_fg = color_fg_tuple->value->uint32;

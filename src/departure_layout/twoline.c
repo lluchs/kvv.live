@@ -46,7 +46,7 @@ static struct DepartureLine* create(const struct Departure *d, GRect frame) {
 	kerning_text_layer_set_text(line->time, d->time);
 
 	// platform
-	line->platform = text_layer_create((GRect) { .origin = { 30, DEPARTURE_HEIGHT }, .size = { 50, DEPARTURE_HEIGHT } });
+	line->platform = text_layer_create((GRect) { .origin = { 30, DEPARTURE_HEIGHT }, .size = { 55, DEPARTURE_HEIGHT } });
 	text_layer_set_text(line->platform, d->platform);
 
 	// Add to the frame.
@@ -60,7 +60,7 @@ static struct DepartureLine* create(const struct Departure *d, GRect frame) {
 
 static void update(struct DepartureLine *line) {
 	departure_layout_update(line);
-
+	text_layer_set_text(line->platform, line->departure->platform);
 }
 
 static void destroy(struct DepartureLine *line) {
